@@ -19,6 +19,7 @@ import pandas as pd
 
 
 import PIL
+from PIL import ImageOps
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import ImageGrid
 
@@ -197,7 +198,7 @@ class WindowImages(keras.utils.Sequence):
                 
                 
             
-            
+            """
             img[:,:,0] = (img[:,:,0] - img[:,:,0].min())
             img[:,:,0] = ((img[:,:,0] / img[:,:,0].max()) * 2) - 1
             
@@ -206,7 +207,10 @@ class WindowImages(keras.utils.Sequence):
             
             img[:,:,2] = (img[:,:,2] - img[:,:,2].min())
             img[:,:,2] = ((img[:,:,2] / img[:,:,2].max()) * 2) - 1
-                
+            """
+            
+            img = (img - img.min())
+            img = ((img / img.max()) * 2) - 1
             
             #print('Mean: ' + str(np.mean(img)) + ' | Min: ' + str(img.min()) + ' | Max: ' + str(img.max()))
             
@@ -279,13 +283,21 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
         return inputs, conv10, model
     
 
-input_dir = 'F:/Diploma/dataset/'
-target_dir = 'F:/Diploma/masks_renamed/'
-model_dir = 'F:/Diploma/models/'
+cluster_mode = False
 
-build_model = False
-calculate_metrics = False
-show_predictions = False
+if cluster_mode :
+    input_dir = '/storage/local/hdd/dataset/'
+    target_dir = '/storage/local/hdd/masks_renamed/'
+    model_dir = '/home/ales/gcb/models/'
+else :   
+    input_dir = 'F:/Diploma/dataset/'
+    target_dir = 'F:/Diploma/masks_renamed/'
+    model_dir = 'F:/Diploma/models/'
+
+
+build_model = True
+calculate_metrics = True
+show_predictions = True
 model_path = 'F:/Diploma/models/model_average_6.h5'
 
 augment = True
@@ -293,10 +305,10 @@ augment = True
 img_size = (512, 608)
 #img_size = (128, 152)
 num_classes = 2
-batch_size = 3
-num_epochs = 60
+batch_size = 16
+num_epochs = 50
 
-input_type = InputType.STOKES
+input_type = InputType.AVERAGE
 
 images = sorted(
     [
@@ -333,7 +345,7 @@ val_masks = masks[-val_samples:]
 train_gen = WindowImages(train_images, train_masks, input_type=input_type, batch_size=batch_size, img_size=img_size, augment=augment)
 val_gen = WindowImages(val_images, val_masks, input_type=input_type, batch_size=batch_size, img_size=img_size, augment=augment)
 
-
+"""
 
 
 imgs = train_gen.__getitem__(0)
@@ -360,7 +372,7 @@ with tf.compat.v1.Session(config=config) as sess:
     if build_model :
         # Build model
         #model = get_model(img_size, num_classes, input_type=input_type)
-        inputs, outputs, model = unet_model_blocks(input_type=input_type, block_number=4, filter_number=8)
+        inputs, outputs, model = unet_model_blocks(input_type=input_type, block_number=4, filter_number=16)
         
         model.summary()
         
@@ -515,4 +527,3 @@ with tf.compat.v1.Session(config=config) as sess:
             
             print('AVERAGE ::: Precision: ' + str(pr_sum / num_of_preds) + ' ;  ' + 'Recall: ' + str(re_sum / num_of_preds) + ' ;  ' + 'F1: ' + str(f1_sum / num_of_preds))
     
-"""
