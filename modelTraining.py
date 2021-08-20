@@ -364,9 +364,6 @@ for ax, j in zip(grid, range(9)) :
 
 """
 
-strategy = tf.distribute.MirroredStrategy()
-print("Number of devices: {}".format(strategy.num_replicas_in_sync))
-
 
 #data_gen = WindowImages(images, masks, input_type=input_type, batch_size=batch_size, img_size=img_size)
 config = tf.compat.v1.ConfigProto()
@@ -377,11 +374,10 @@ with tf.compat.v1.Session(config=config) as sess:
         # Build model
         #model = get_model(img_size, num_classes, input_type=input_type)
         
-        with strategy.scope():
-            inputs, outputs, model = unet_model_blocks(input_type=input_type, block_number=4, filter_number=16)
+        inputs, outputs, model = unet_model_blocks(input_type=input_type, block_number=4, filter_number=16)
             
-            #model.summary()
-            model.compile(optimizer="adam", loss='sparse_categorical_crossentropy', metrics=["sparse_categorical_accuracy"])
+        #model.summary()
+        model.compile(optimizer="adam", loss='sparse_categorical_crossentropy', metrics=["sparse_categorical_accuracy"])
             
         # Train the model, doing validation at the end of each epoch.
         epochs = num_epochs
