@@ -306,7 +306,7 @@ img_size = (512, 608)
 #img_size = (128, 152)
 num_classes = 2
 batch_size = 8
-num_epochs = 50
+num_epochs = 5
 
 input_type = InputType.AVERAGE
 
@@ -366,7 +366,7 @@ for ax, j in zip(grid, range(9)) :
 
 #data_gen = WindowImages(images, masks, input_type=input_type, batch_size=batch_size, img_size=img_size)
 config = tf.compat.v1.ConfigProto()
-config.gpu_options.per_process_gpu_memory_fraction = 0.9
+config.gpu_options.per_process_gpu_memory_fraction = 1.0
 config.gpu_options.allow_growth = True
 with tf.compat.v1.Session(config=config) as sess:
     if build_model :
@@ -384,15 +384,12 @@ with tf.compat.v1.Session(config=config) as sess:
         # Train the model, doing validation at the end of each epoch.
         epochs = num_epochs
         
-        if not cluster_mode :
+        callbacks = [
+            keras.callbacks.ModelCheckpoint("window_segmentation", save_best_only=True)
+        ]
             
-            callbacks = [
-                keras.callbacks.ModelCheckpoint("window_segmentation.h5", save_best_only=True)
-            ]
-            
-            history = model.fit(train_gen, epochs=epochs, validation_data=val_gen, callbacks=callbacks)
-        else :
-            history = model.fit(train_gen, epochs=epochs, validation_data=val_gen)
+        history = model.fit(train_gen, epochs=epochs, validation_data=val_gen, callbacks=callbacks)
+
         
         # list all data in history
         print(history.history.keys())
@@ -420,7 +417,7 @@ with tf.compat.v1.Session(config=config) as sess:
         ]
         
         model_type_num = str(len(model_names) + 1)
-        model_path = model_dir + 'model_' + input_type.value + '_' + model_type_num + '.h5'
+        model_path = model_dir + 'model_' + input_type.value + '_' + model_type_num
         
         model.save(model_path)
         
