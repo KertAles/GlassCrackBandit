@@ -305,7 +305,7 @@ augment = True
 img_size = (512, 608)
 #img_size = (128, 152)
 num_classes = 2
-batch_size = 16
+batch_size = 8
 num_epochs = 50
 
 input_type = InputType.AVERAGE
@@ -366,7 +366,7 @@ for ax, j in zip(grid, range(9)) :
 
 #data_gen = WindowImages(images, masks, input_type=input_type, batch_size=batch_size, img_size=img_size)
 config = tf.compat.v1.ConfigProto()
-config.gpu_options.per_process_gpu_memory_fraction = 0.4
+config.gpu_options.per_process_gpu_memory_fraction = 0.9
 config.gpu_options.allow_growth = True
 with tf.compat.v1.Session(config=config) as sess:
     if build_model :
