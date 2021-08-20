@@ -381,15 +381,18 @@ with tf.compat.v1.Session(config=config) as sess:
         # because our target data is integers.
         model.compile(optimizer="adam", loss='sparse_categorical_crossentropy', metrics=["sparse_categorical_accuracy"])
         
-        callbacks = [
-            keras.callbacks.ModelCheckpoint("/home/ales/gcb/window_segmentation.h5", save_best_only=True)
-        ]
-        
         # Train the model, doing validation at the end of each epoch.
         epochs = num_epochs
         
-        
-        history = model.fit(train_gen, epochs=epochs, validation_data=val_gen, callbacks=callbacks)
+        if not cluster_mode :
+            
+            callbacks = [
+                keras.callbacks.ModelCheckpoint("window_segmentation.h5", save_best_only=True)
+            ]
+            
+            history = model.fit(train_gen, epochs=epochs, validation_data=val_gen, callbacks=callbacks)
+        else :
+            history = model.fit(train_gen, epochs=epochs, validation_data=val_gen)
         
         # list all data in history
         print(history.history.keys())
