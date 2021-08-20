@@ -382,7 +382,7 @@ with tf.compat.v1.Session(config=config) as sess:
         model.compile(optimizer="adam", loss='sparse_categorical_crossentropy', metrics=["sparse_categorical_accuracy"])
         
         callbacks = [
-            keras.callbacks.ModelCheckpoint("window_segmentation.h5", save_best_only=True)
+            keras.callbacks.ModelCheckpoint("/home/ales/gcb/window_segmentation.h5", save_best_only=True)
         ]
         
         # Train the model, doing validation at the end of each epoch.
