@@ -283,7 +283,7 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
         return inputs, conv10, model
     
 
-cluster_mode = False
+cluster_mode = True
 
 if cluster_mode :
     input_dir = '/storage/local/hdd/dataset/'
