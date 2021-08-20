@@ -297,7 +297,7 @@ else :
 
 build_model = True
 calculate_metrics = True
-show_predictions = True
+show_predictions = False
 model_path = 'F:/Diploma/models/model_average_6.h5'
 
 augment = True
@@ -305,8 +305,8 @@ augment = True
 img_size = (512, 608)
 #img_size = (128, 152)
 num_classes = 2
-batch_size = 8
-num_epochs = 5
+batch_size = 12
+num_epochs = 50
 
 input_type = InputType.AVERAGE
 
@@ -364,6 +364,10 @@ for ax, j in zip(grid, range(9)) :
 
 """
 
+strategy = tf.distribute.MirroredStrategy()
+print("Number of devices: {}".format(strategy.num_replicas_in_sync))
+
+
 #data_gen = WindowImages(images, masks, input_type=input_type, batch_size=batch_size, img_size=img_size)
 config = tf.compat.v1.ConfigProto()
 config.gpu_options.per_process_gpu_memory_fraction = 1.0
@@ -372,15 +376,13 @@ with tf.compat.v1.Session(config=config) as sess:
     if build_model :
         # Build model
         #model = get_model(img_size, num_classes, input_type=input_type)
-        inputs, outputs, model = unet_model_blocks(input_type=input_type, block_number=4, filter_number=16)
         
-        model.summary()
-        
-        # Configure the model for training.
-        # We use the "sparse" version of categorical_crossentropy
-        # because our target data is integers.
-        model.compile(optimizer="adam", loss='sparse_categorical_crossentropy', metrics=["sparse_categorical_accuracy"])
-        
+        with strategy.scope():
+            inputs, outputs, model = unet_model_blocks(input_type=input_type, block_number=4, filter_number=16)
+            
+            #model.summary()
+            model.compile(optimizer="adam", loss='sparse_categorical_crossentropy', metrics=["sparse_categorical_accuracy"])
+            
         # Train the model, doing validation at the end of each epoch.
         epochs = num_epochs
         
@@ -443,7 +445,7 @@ with tf.compat.v1.Session(config=config) as sess:
     
     # Generate predictions for all images in the validation set
     
-    val_gen = WindowImages(val_images, val_masks, input_type=input_type, batch_size=1, img_size=img_size, augment=False)
+    val_gen = WindowImages(val_images, val_masks, input_type=input_type, batch_size=batch_size, img_size=img_size, augment=False)
     
             
     if show_predictions :
