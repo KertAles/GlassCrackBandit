@@ -198,7 +198,7 @@ class WindowImages(keras.utils.Sequence):
                 
                 
             
-            """
+            
             img[:,:,0] = (img[:,:,0] - img[:,:,0].min())
             img[:,:,0] = ((img[:,:,0] / img[:,:,0].max()) * 2) - 1
             
@@ -211,7 +211,7 @@ class WindowImages(keras.utils.Sequence):
             
             img = (img - img.min())
             img = ((img / img.max()) * 2) - 1
-            
+            """
             #print('Mean: ' + str(np.mean(img)) + ' | Min: ' + str(img.min()) + ' | Max: ' + str(img.max()))
             
             x[j] = img
@@ -308,7 +308,7 @@ num_classes = 2
 batch_size = 12
 num_epochs = 50
 
-input_type = InputType.FOUR_CHANNEL
+input_type = InputType.STOKES
 
 images = sorted(
     [
