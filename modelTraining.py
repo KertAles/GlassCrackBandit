@@ -393,7 +393,7 @@ for ax, j in zip(grid, range(9)) :
 
 #data_gen = WindowImages(images, masks, input_type=input_type, batch_size=batch_size, img_size=img_size)
 config = tf.compat.v1.ConfigProto()
-config.gpu_options.per_process_gpu_memory_fraction = 0.8
+config.gpu_options.per_process_gpu_memory_fraction = 1.0
 config.gpu_options.allow_growth = True
 with tf.compat.v1.Session(config=config) as sess:
     if build_model :
