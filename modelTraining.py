@@ -32,7 +32,8 @@ class InputType(Enum) :
     AVERAGE = "average"
     FOUR_CHANNEL = "four_channel"
     STOKES = "stokes"
-    STOKES_PLUS = "stokes_plus"
+    STOKES_CALC = "stokes_calc"
+    STOKES_CALC_PLUS = "stokes_calc_plus"
 
 
 class WindowImages(keras.utils.Sequence):
@@ -70,10 +71,29 @@ class WindowImages(keras.utils.Sequence):
         
         stokes = np.zeros((h, w, 3))
         stokes[:, :, 0] = (channels[0][:, :, 0] +  channels[1][:, :, 0]) / 2
-        stokes[:, :, 1] = (channels[0][:, :, 0] -  channels[1][:, :, 0] + 255 * 0) / 2
-        stokes[:, :, 2] = (channels[2][:, :, 0] -  channels[3][:, :, 0] + 255 * 0) / 2
+        stokes[:, :, 1] = (channels[0][:, :, 0] -  channels[1][:, :, 0] + 255) / 2
+        stokes[:, :, 2] = (channels[2][:, :, 0] -  channels[3][:, :, 0] + 255) / 2
         
         return stokes
+    
+    def calculateDegAngOfPol(self, stokes, w_s = 0.75) :
+        h = stokes.shape[0]
+        w = stokes.shape[1]
+        
+        mean = np.mean(stokes)
+        
+        S0_adj = stokes[:, :, 0] * w_s + mean * (1-w_s)
+        dolp = (np.sqrt(np.square(stokes[:, :, 1]) + np.square(stokes[:, :, 2])) / S0_adj)
+        
+        S1_adj = stokes[:, :, 1] * w_s + mean * (1-w_s)
+        aolp = 0.5 * np.arctan2(stokes[:, :, 2], S1_adj)
+        
+        
+        d_a_olp = np.zeros((h, w, 2))
+        d_a_olp[:, :, 0] = dolp
+        d_a_olp[:, :, 1] = aolp
+        
+        return d_a_olp
     
     def image_histogram_equalization(self, channel, number_bins=256):
         image_histogram, bins = np.histogram(channel.flatten(), number_bins, density=True)
@@ -143,7 +163,7 @@ class WindowImages(keras.utils.Sequence):
             img = img_eq
             
         return img
-               
+
     
     def getAllData(self) :
         return self.getData(self.images, self.masks)
@@ -156,8 +176,10 @@ class WindowImages(keras.utils.Sequence):
             num_of_channels = (4,)
         elif self.input_type == InputType.STOKES :
             num_of_channels = (3,)
-        elif self.input_type == InputType.STOKES_PLUS :
-            num_of_channels = (4,)
+        elif self.input_type == InputType.STOKES_CALC :
+            num_of_channels = (2,)
+        elif self.input_type == InputType.STOKES_CALC_PLUS :
+            num_of_channels = (3,)
      
         x = np.zeros((len(batch_images),) + self.img_size + num_of_channels, dtype="float32")
   
@@ -187,28 +209,30 @@ class WindowImages(keras.utils.Sequence):
                     subImgs = self.applyAugmentation(subImgs)
                 
             if self.input_type == InputType.STOKES :
-                subImgs = ndimage.gaussian_filter(subImgs, sigma=0.8)
+                subImgs = ndimage.gaussian_filter(subImgs, sigma=0.7)
                 img = self.extract_stokes(subImgs)
-            elif self.input_type == InputType.STOKES_PLUS :
-                subImgs = ndimage.gaussian_filter(subImgs, sigma=0.8)
+            elif self.input_type == InputType.STOKES_CALC :
+                subImgs = ndimage.gaussian_filter(subImgs, sigma=0.7)
                 stokes = self.extract_stokes(subImgs)
-                grayscale_img = (subImgs[0] + subImgs[1] + subImgs[2] + subImgs[3]) / 4
                 
-                img = np.concatenate((stokes, grayscale_img), axis=-1)
+                img = self.calculateDegAngOfPol(stokes)
+            elif self.input_type == InputType.STOKES_CALC_PLUS :
+                gray = (subImgs[0] + subImgs[1] + subImgs[2] + subImgs[3]) / 4
+                
+                subImgs = ndimage.gaussian_filter(subImgs, sigma=0.7)
+                stokes = self.extract_stokes(subImgs)
+                
+                img = np.concatenate((gray, self.calculateDegAngOfPol(stokes)), axis=-1)
                 
                 
+                
+            for i in range(img.shape[2]) :
+                img[:, :, i] = (img[:, :, i] - np.mean(img[:, :, i])) / np.std(img[:, :, i])
             
-            
+            """
             img[:,:,0] = (img[:,:,0] - img[:,:,0].min())
             img[:,:,0] = ((img[:,:,0] / img[:,:,0].max()) * 2) - 1
-            
-            img[:,:,1] = (img[:,:,1] - img[:,:,1].min())
-            img[:,:,1] = ((img[:,:,1] / img[:,:,1].max()) * 2) - 1
-            
-            img[:,:,2] = (img[:,:,2] - img[:,:,2].min())
-            img[:,:,2] = ((img[:,:,2] / img[:,:,2].max()) * 2) - 1
-            """
-            
+  
             img = (img - img.min())
             img = ((img / img.max()) * 2) - 1
             """
@@ -242,8 +266,10 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
                 num_of_channels = (4,)
             elif input_type == InputType.STOKES :
                 num_of_channels = (3,)
-            elif input_type == InputType.STOKES_PLUS :
-                num_of_channels = (4,)
+            elif input_type == InputType.STOKES_CALC :
+                num_of_channels = (2,)
+            elif input_type == InputType.STOKES_CALC_PLUS :
+                num_of_channels = (3,)
             
             inputs = layers.Input((None, None) + num_of_channels)
             
@@ -295,10 +321,13 @@ else :
     model_dir = 'F:/Diploma/models/'
 
 
+os.environ["CUDA_VISIBLE_DEVICES"]="3"
+
+
 build_model = True
-calculate_metrics = True
+calculate_metrics = False
 show_predictions = False
-model_path = 'F:/Diploma/models/model_average_6.h5'
+model_path = 'F:/Diploma/code/models/model_stokes_1'
 
 augment = True
 
@@ -306,9 +335,9 @@ img_size = (512, 608)
 #img_size = (128, 152)
 num_classes = 2
 batch_size = 12
-num_epochs = 50
+num_epochs = 30
 
-input_type = InputType.STOKES
+input_type = InputType.AVERAGE
 
 images = sorted(
     [
@@ -346,8 +375,6 @@ train_gen = WindowImages(train_images, train_masks, input_type=input_type, batch
 val_gen = WindowImages(val_images, val_masks, input_type=input_type, batch_size=batch_size, img_size=img_size, augment=augment)
 
 """
-
-
 imgs = train_gen.__getitem__(0)
 
 fig = plt.figure(figsize=(60., 60.))
@@ -389,25 +416,6 @@ with tf.compat.v1.Session(config=config) as sess:
         history = model.fit(train_gen, epochs=epochs, validation_data=val_gen, callbacks=callbacks)
 
         
-        # list all data in history
-        print(history.history.keys())
-        # summarize history for accuracy
-        plt.plot(history.history['sparse_categorical_accuracy'])
-        plt.plot(history.history['val_sparse_categorical_accuracy'])
-        plt.title('model accuracy')
-        plt.ylabel('accuracy')
-        plt.xlabel('epoch')
-        plt.legend(['train', 'test'], loc='upper left')
-        plt.show()
-        # summarize history for loss
-        plt.plot(history.history['loss'])
-        plt.plot(history.history['val_loss'])
-        plt.title('model loss')
-        plt.ylabel('loss')
-        plt.xlabel('epoch')
-        plt.legend(['train', 'test'], loc='upper left')
-        plt.show()
-            
         model_names = [
             mod_name
             for mod_name in os.listdir(model_dir)
@@ -431,7 +439,7 @@ with tf.compat.v1.Session(config=config) as sess:
     else :
         model = keras.models.load_model(model_path)
         
-        val_gen = WindowImages(val_images, val_masks, input_type=input_type, batch_size=batch_size, img_size=img_size, augment=False)
+        #val_gen = WindowImages(val_images, val_masks, input_type=input_type, batch_size=batch_size, img_size=img_size, augment=False)
     
        
         
@@ -441,7 +449,8 @@ with tf.compat.v1.Session(config=config) as sess:
     
     # Generate predictions for all images in the validation set
     
-    val_gen = WindowImages(val_images, val_masks, input_type=input_type, batch_size=batch_size, img_size=img_size, augment=False)
+    val_gen = WindowImages(val_images, val_masks, input_type=input_type, batch_size=1, img_size=img_size, augment=False)
+    #val_gen = WindowImages(train_images, train_masks, input_type=input_type, batch_size=1, img_size=img_size, augment=False)
     
             
     if show_predictions :
@@ -514,6 +523,7 @@ with tf.compat.v1.Session(config=config) as sess:
             
         
             for i in range(num_of_preds):
+                
                 (pr, re, f1) = get_metrics(i)
             
                 pr_sum += pr
