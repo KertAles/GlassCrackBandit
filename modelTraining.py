@@ -320,14 +320,14 @@ else :
     target_dir = 'F:/Diploma/masks_renamed/'
     model_dir = 'F:/Diploma/models/'
 
-
-os.environ["CUDA_VISIBLE_DEVICES"]="3"
+if cluster_mode :
+    os.environ["CUDA_VISIBLE_DEVICES"]="3"
 
 
 build_model = True
 calculate_metrics = False
 show_predictions = False
-model_path = 'F:/Diploma/code/models/models/model_stokes_1'
+model_path = 'F:/Diploma/code/models/models/model_average_5'
 
 augment = True
 
@@ -337,7 +337,7 @@ num_classes = 2
 batch_size = 12
 num_epochs = 30
 
-input_type = InputType.FOUR_CHANNEL
+input_type = InputType.STOKES
 
 images = sorted(
     [
