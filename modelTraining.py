@@ -327,7 +327,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="3"
 build_model = True
 calculate_metrics = False
 show_predictions = False
-model_path = 'F:/Diploma/code/models/model_stokes_1'
+model_path = 'F:/Diploma/code/models/models/model_stokes_1'
 
 augment = True
 
