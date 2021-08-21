@@ -337,7 +337,7 @@ num_classes = 2
 batch_size = 12
 num_epochs = 30
 
-input_type = InputType.AVERAGE
+input_type = InputType.FOUR_CHANNEL
 
 images = sorted(
     [
