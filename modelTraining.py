@@ -333,7 +333,7 @@ else :
     model_dir = 'F:/Diploma/models/'
 
 if cluster_mode :
-    os.environ["CUDA_VISIBLE_DEVICES"]="0"
+    os.environ["CUDA_VISIBLE_DEVICES"]="2"
 
 
 build_model = True
@@ -349,7 +349,7 @@ num_classes = 2
 batch_size = 12
 num_epochs = 25
 
-input_type = InputType.AVERAGE
+input_type = InputType.FOUR_CHANNEL
 
 images = sorted(
     [
