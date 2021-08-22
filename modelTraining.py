@@ -80,12 +80,12 @@ class WindowImages(keras.utils.Sequence):
         h = stokes.shape[0]
         w = stokes.shape[1]
         
-        mean = np.mean(stokes)
-        
-        S0_adj = stokes[:, :, 0] * w_s + mean * (1-w_s)
+        mean_S0 = np.mean(stokes[:, :, 0])
+        S0_adj = stokes[:, :, 0] * w_s + mean_S0 * (1-w_s)
         dolp = (np.sqrt(np.square(stokes[:, :, 1]) + np.square(stokes[:, :, 2])) / S0_adj)
         
-        S1_adj = stokes[:, :, 1] * w_s + mean * (1-w_s)
+        mean_S1 = np.mean(stokes[:, :, 1])
+        S1_adj = stokes[:, :, 1] * w_s + mean_S1 * (1-w_s)
         aolp = 0.5 * np.arctan2(stokes[:, :, 2], S1_adj)
         
         
@@ -225,18 +225,31 @@ class WindowImages(keras.utils.Sequence):
                 img = np.concatenate((gray, self.calculateDegAngOfPol(stokes)), axis=-1)
                 
                 
+            if self.input_type == InputType.FOUR_CHANNEL:
+                mean = np.mean(img)
+                std = 3 * np.std(img)
+                    
+                img = (img - (mean - std))
+                img = ((img / (mean + std)) * 2) - 1
+            else :
+                for i in range(img.shape[2]) :
+                    mean = np.mean(img[:, :, i])
+                    std = 2 * np.std(img[:, :, i])
+                    
+                    img[:,:,i] = (img[:,:,i] - (mean - std))
+                    img[:,:,i] = ((img[:,:,i] / (mean + std)) * 2) - 1
+                    #print('POST ::: Mean: ' + str(np.mean(img[:, :, i])) + ' | Min: ' + str(img[:, :, i].min()) + ' | Max: ' + str(img[:, :, i].max())  + ' | Std: ' + str(np.std(img[:, :, i])) )
                 
-            for i in range(img.shape[2]) :
-                img[:, :, i] = (img[:, :, i] - np.mean(img[:, :, i])) / np.std(img[:, :, i])
-            
             """
             img[:,:,0] = (img[:,:,0] - img[:,:,0].min())
             img[:,:,0] = ((img[:,:,0] / img[:,:,0].max()) * 2) - 1
-  
+            
             img = (img - img.min())
             img = ((img / img.max()) * 2) - 1
             """
-            #print('Mean: ' + str(np.mean(img)) + ' | Min: ' + str(img.min()) + ' | Max: ' + str(img.max()))
+            
+            #print('ALLTOGETHER ::: Mean: ' + str(np.mean(img)) + ' | Min: ' + str(img.min()) + ' | Max: ' + str(img.max())  + ' | Std: ' + str(np.std(img)) )
+            
             
             x[j] = img
             
@@ -324,9 +337,9 @@ if cluster_mode :
 
 
 build_model = True
-calculate_metrics = False
-show_predictions = False
-model_path = 'F:/Diploma/code/models/models/model_stokes_3'
+calculate_metrics = True
+show_predictions = True
+model_path = 'F:/Diploma/code/models/models/model_stokes_calc_1'
 
 augment = True
 
@@ -334,9 +347,9 @@ img_size = (512, 608)
 #img_size = (128, 152)
 num_classes = 2
 batch_size = 12
-num_epochs = 30
+num_epochs = 25
 
-input_type = InputType.STOKES_CALC
+input_type = InputType.AVERAGE
 
 images = sorted(
     [
@@ -386,9 +399,9 @@ for ax, j in zip(grid, range(9)) :
     img = imgs[0][j//3]
     ax.imshow(img[:,:,j%3])
       
-    
-
 """
+
+
 
 
 #data_gen = WindowImages(images, masks, input_type=input_type, batch_size=batch_size, img_size=img_size)
@@ -452,7 +465,7 @@ with tf.compat.v1.Session(config=config) as sess:
     #val_gen = WindowImages(train_images, train_masks, input_type=input_type, batch_size=1, img_size=img_size, augment=False)
     
             
-    if show_predictions :
+    if show_predictions and not cluster_mode :
         def get_mask(i):
             mask = np.argmax(val_preds[i], axis=-1)
             mask = np.expand_dims(mask, axis=-1)
