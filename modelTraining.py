@@ -333,7 +333,7 @@ cluster_mode = True
 if cluster_mode :
     input_dir = '/storage/local/hdd/dataset/'
     target_dir = '/storage/local/hdd/masks_renamed/'
-    model_dir = '/home/ales/gcb/models/'
+    model_dir = '/home/ales/gcb/GlassCrackBandit/models/'
 else :   
     input_dir = 'F:/Diploma/dataset/'
     target_dir = 'F:/Diploma/masks_renamed/'
@@ -353,7 +353,7 @@ augment = True
 img_size = (512, 608)
 #img_size = (128, 152)
 num_classes = 2
-batch_size = 12
+batch_size = 16
 num_epochs = 25
 
 input_type = InputType.FOUR_CHANNEL
