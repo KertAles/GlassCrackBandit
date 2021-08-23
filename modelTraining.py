@@ -338,7 +338,7 @@ if cluster_mode :
 build_model = True
 calculate_metrics = True
 show_predictions = True
-model_path = 'F:/Diploma/code/models/model_stokes_2'
+model_path = 'F:/Diploma/code/models/model_four_channel_6'
 
 augment = True
 
@@ -348,7 +348,7 @@ num_classes = 2
 batch_size = 12
 num_epochs = 40
 
-input_type = InputType.FOUR_CHANNEL
+input_type = InputType.AVERAGE
 
 images = sorted(
     [
@@ -527,8 +527,6 @@ if True:
 
         if calculate_metrics :
             
-        
-        
             num_of_preds = len(val_preds)
             pr_sum = 0.0
             re_sum = 0.0

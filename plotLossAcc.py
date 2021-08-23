@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import ImageGrid
 
 
-file_path = 'F:/Diploma/code/models/history_stokes_2.json'
+file_path = 'F:/Diploma/code/models/history_four_channel_6.json'
 file = open(file_path)
 
 history = json.load(file)
