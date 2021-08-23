@@ -19,6 +19,8 @@ from tensorflow.keras.layers import BatchNormalization, Conv2D, MaxPooling2D, Dr
 import pandas as pd
 from focal_loss import SparseCategoricalFocalLoss
 
+import sklearn.metrics as metr
+
 
 import PIL
 from PIL import ImageOps
@@ -228,17 +230,11 @@ class WindowImages(keras.utils.Sequence):
                 
                 
             if self.input_type == InputType.FOUR_CHANNEL:
-                
                 mean = np.mean(img)
                 std = 3 * np.std(img)
                     
                 img = (img - (mean - std))
                 img = ((img / (mean + std)) * 2) - 1 
-                """
-                
-                img = (img - img.min())
-                img = ((img / img.max()) * 2) - 1
-                """
             else :
                 for i in range(img.shape[2]) :
                     mean = np.mean(img[:, :, i])
@@ -247,17 +243,8 @@ class WindowImages(keras.utils.Sequence):
                     img[:,:,i] = (img[:,:,i] - (mean - std))
                     img[:,:,i] = ((img[:,:,i] / (mean + std)) * 2) - 1
                     #print('POST ::: Mean: ' + str(np.mean(img[:, :, i])) + ' | Min: ' + str(img[:, :, i].min()) + ' | Max: ' + str(img[:, :, i].max())  + ' | Std: ' + str(np.std(img[:, :, i])) )
-                
-            """
-            img[:,:,0] = (img[:,:,0] - img[:,:,0].min())
-            img[:,:,0] = ((img[:,:,0] / img[:,:,0].max()) * 2) - 1
-            
-            img = (img - img.min())
-            img = ((img / img.max()) * 2) - 1
-            """
             
             #print('ALLTOGETHER ::: Mean: ' + str(np.mean(img)) + ' | Min: ' + str(img.min()) + ' | Max: ' + str(img.max())  + ' | Std: ' + str(np.std(img)) )
-            
             
             x[j] = img
             
@@ -349,7 +336,7 @@ if cluster_mode :
 build_model = True
 calculate_metrics = True
 show_predictions = True
-model_path = 'F:/Diploma/code/models/model_four_channel_5'
+model_path = 'F:/Diploma/code/models/model_four_channel_7'
 
 augment = True
 
@@ -357,9 +344,9 @@ img_size = (512, 608)
 #img_size = (128, 152)
 num_classes = 2
 batch_size = 16
-num_epochs = 25
+num_epochs = 30
 
-input_type = InputType.FOUR_CHANNEL
+input_type = InputType.AVERAGE
 
 images = sorted(
     [
@@ -489,7 +476,7 @@ if True:
             _, gt = val_gen.__getitem__(i)
             
             gt = gt[0]
-            
+        
             TP = 0
             FP = 0
             TN = 0
