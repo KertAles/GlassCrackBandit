@@ -415,7 +415,7 @@ if True:
         inputs, outputs, model = unet_model_blocks(input_type=input_type, block_number=4, filter_number=16)
             
         #model.summary()
-        model.compile(optimizer="adam", loss=SparseCategoricalFocalLoss(gamma=2), metrics=["sparse_categorical_accuracy"])
+        model.compile(optimizer="adam", loss=SparseCategoricalFocalLoss(gamma=3), metrics=["sparse_categorical_accuracy"])
             
         # Train the model, doing validation at the end of each epoch.
         epochs = num_epochs
@@ -460,8 +460,8 @@ if True:
     
     # Generate predictions for all images in the validation set
     
-    #val_gen = WindowImages(val_images, val_masks, input_type=input_type, batch_size=1, img_size=img_size, augment=False)
-    val_gen = WindowImages(train_images, train_masks, input_type=input_type, batch_size=1, img_size=img_size, augment=False)
+    val_gen = WindowImages(val_images, val_masks, input_type=input_type, batch_size=1, img_size=img_size, augment=False)
+    #val_gen = WindowImages(train_images, train_masks, input_type=input_type, batch_size=1, img_size=img_size, augment=False)
     
             
     if show_predictions and not cluster_mode :
@@ -516,10 +516,10 @@ if True:
         
         for ax, j in zip(grid, range(i, i + num_of_vals * 3)) :
             if j%3 == 0 :
-                img = load_img(train_images[j // 3], target_size=img_size)
+                img = load_img(val_images[j // 3], target_size=img_size)
                 ax.imshow(img)
             elif j%3 == 1 :
-                img = PIL.ImageOps.autocontrast(load_img(train_masks[j // 3]))
+                img = PIL.ImageOps.autocontrast(load_img(val_masks[j // 3]))
                 ax.imshow(img)
             else :
                 ax.imshow(get_mask(j // 3))
@@ -536,10 +536,7 @@ if True:
             
         
             for i in range(num_of_preds):
-                
-                if i > 3:
-                    break
-                
+   
                 (pr, re, f1) = get_metrics(i)
             
                 pr_sum += pr
