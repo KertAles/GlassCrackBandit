@@ -328,7 +328,7 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
         return inputs, conv10, model
     
 
-cluster_mode = False
+cluster_mode = True
 
 if cluster_mode :
     input_dir = '/storage/local/hdd/dataset/'
@@ -343,7 +343,7 @@ if cluster_mode :
     os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 
-build_model = False
+build_model = True
 calculate_metrics = True
 show_predictions = True
 model_path = 'F:/Diploma/code/models/model_four_channel_3'
