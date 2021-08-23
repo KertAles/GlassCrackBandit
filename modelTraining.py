@@ -321,14 +321,14 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
 
             x = conv8
 
-        conv10 = Conv2D(num_classes, (3,3), activation='sigmoid', padding="same")(x)
+        conv10 = Conv2D(num_classes, (3,3), activation='softmax', padding="same")(x)
         
         model = keras.Model(inputs, conv10)
 
         return inputs, conv10, model
     
 
-cluster_mode = True
+cluster_mode = False
 
 if cluster_mode :
     input_dir = '/storage/local/hdd/dataset/'
@@ -343,10 +343,10 @@ if cluster_mode :
     os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 
-build_model = True
+build_model = False
 calculate_metrics = True
 show_predictions = True
-model_path = 'F:/Diploma/code/models/models/model_four_channel_5'
+model_path = 'F:/Diploma/code/models/model_four_channel_3'
 
 augment = True
 
