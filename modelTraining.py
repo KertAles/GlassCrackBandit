@@ -13,6 +13,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.preprocessing.image import load_img
 from tensorflow.keras import layers
+import tensorflow_addons as tfa
 from scipy import ndimage
 from tensorflow.keras.layers import BatchNormalization, Conv2D, MaxPooling2D, Dropout, UpSampling2D, concatenate
 import pandas as pd
@@ -226,11 +227,17 @@ class WindowImages(keras.utils.Sequence):
                 
                 
             if self.input_type == InputType.FOUR_CHANNEL:
+                
                 mean = np.mean(img)
                 std = 3 * np.std(img)
                     
                 img = (img - (mean - std))
-                img = ((img / (mean + std)) * 2) - 1
+                img = ((img / (mean + std)) * 2) - 1 
+                """
+                
+                img = (img - img.min())
+                img = ((img / img.max()) * 2) - 1
+                """
             else :
                 for i in range(img.shape[2]) :
                     mean = np.mean(img[:, :, i])
@@ -294,13 +301,13 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
             conv1 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(x)
             conv1 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(conv1)
             block_features.append(conv1)
+            conv1 = BatchNormalization()(conv1)
             pool1 = MaxPooling2D(pool_size=(2, 2))(conv1)
             x = pool1
 
         fn_cur = filter_num*(2**(block_number))
         conv3 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(x)
         conv3 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(conv3)
-        conv3 = BatchNormalization()(conv3)
         drop3 = Dropout(0.5)(conv3)
         x = drop3
         for i in range(block_number):
@@ -310,11 +317,11 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
             merge8 = concatenate([block_features.pop(), up8], axis=3)
 
             conv8 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(merge8)
-            conv8 = Conv2D(fn_cur, 3, activation='relu', padding='same')(conv8)
+            conv8 = Conv2D(fn_cur, (3, 3), activation='relu', padding='same')(conv8)
 
             x = conv8
 
-        conv10 = Conv2D(num_classes, 3, activation='softmax', padding="same")(x)
+        conv10 = Conv2D(num_classes, (3,3), activation='sigmoid', padding="same")(x)
         
         model = keras.Model(inputs, conv10)
 
@@ -339,7 +346,7 @@ if cluster_mode :
 build_model = True
 calculate_metrics = True
 show_predictions = True
-model_path = 'F:/Diploma/code/models/models/model_stokes_calc_1'
+model_path = 'F:/Diploma/code/models/models/model_four_channel_5'
 
 augment = True
 
@@ -349,7 +356,7 @@ num_classes = 2
 batch_size = 12
 num_epochs = 25
 
-input_type = InputType.STOKES_CALC_PLUS
+input_type = InputType.FOUR_CHANNEL
 
 images = sorted(
     [
@@ -403,12 +410,12 @@ for ax, j in zip(grid, range(9)) :
 
 
 
-
+"""
 #data_gen = WindowImages(images, masks, input_type=input_type, batch_size=batch_size, img_size=img_size)
-config = tf.compat.v1.ConfigProto()
-config.gpu_options.per_process_gpu_memory_fraction = 1.0
-config.gpu_options.allow_growth = True
-with tf.compat.v1.Session(config=config) as sess:
+tf.config.experimental.set_per_process_memory_fraction(0.75)
+tf.config.experimental.set_per_process_memory_growth(True)
+"""
+if True:
     if build_model :
         # Build model
         #model = get_model(img_size, num_classes, input_type=input_type)
@@ -416,7 +423,7 @@ with tf.compat.v1.Session(config=config) as sess:
         inputs, outputs, model = unet_model_blocks(input_type=input_type, block_number=4, filter_number=16)
             
         #model.summary()
-        model.compile(optimizer="adam", loss='sparse_categorical_crossentropy', metrics=["sparse_categorical_accuracy"])
+        model.compile(optimizer="adam", loss=tfa.losses.SigmoidFocalCrossEntropy(), metrics=["sparse_categorical_accuracy"])
             
         # Train the model, doing validation at the end of each epoch.
         epochs = num_epochs
