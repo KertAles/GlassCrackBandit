@@ -336,7 +336,7 @@ if cluster_mode :
 build_model = True
 calculate_metrics = True
 show_predictions = True
-model_path = 'F:/Diploma/code/models/model_stokes_calc_1'
+model_path = 'F:/Diploma/code/models/model_four_channel_3'
 
 augment = True
 
@@ -344,9 +344,9 @@ img_size = (512, 608)
 #img_size = (128, 152)
 num_classes = 2
 batch_size = 12
-num_epochs = 30
+num_epochs = 40
 
-input_type = InputType.STOKES_CALC
+input_type = InputType.FOUR_CHANNEL
 
 images = sorted(
     [
