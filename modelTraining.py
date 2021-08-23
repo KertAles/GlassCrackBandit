@@ -346,7 +346,7 @@ num_classes = 2
 batch_size = 12
 num_epochs = 30
 
-input_type = InputType.STOKES
+input_type = InputType.STOKES_CALC
 
 images = sorted(
     [
