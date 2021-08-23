@@ -17,6 +17,7 @@ import tensorflow_addons as tfa
 from scipy import ndimage
 from tensorflow.keras.layers import BatchNormalization, Conv2D, MaxPooling2D, Dropout, UpSampling2D, concatenate
 import pandas as pd
+from focal_loss import SparseCategoricalFocalLoss
 
 
 import PIL
@@ -423,7 +424,7 @@ if True:
         inputs, outputs, model = unet_model_blocks(input_type=input_type, block_number=4, filter_number=16)
             
         #model.summary()
-        model.compile(optimizer="adam", loss=tfa.losses.SigmoidFocalCrossEntropy(), metrics=["sparse_categorical_accuracy"])
+        model.compile(optimizer="adam", loss=SparseCategoricalFocalLoss(gamma=2, from_logits=True), metrics=["sparse_categorical_accuracy"])
             
         # Train the model, doing validation at the end of each epoch.
         epochs = num_epochs
