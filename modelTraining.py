@@ -330,7 +330,7 @@ else :
     model_dir = 'F:/Diploma/models/'
 
 if cluster_mode :
-    os.environ["CUDA_VISIBLE_DEVICES"]="3"
+    os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 
 build_model = True
