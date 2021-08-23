@@ -289,6 +289,7 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
             conv1 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(x)
             conv1 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(conv1)
             block_features.append(conv1)
+            conv1 = Dropout(0.2)(conv1)
             conv1 = BatchNormalization()(conv1)
             pool1 = MaxPooling2D(pool_size=(2, 2))(conv1)
             x = pool1
@@ -297,7 +298,7 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
         conv3 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(x)
         conv3 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(conv3)
         conv3 = BatchNormalization()(conv3)
-        drop3 = Dropout(0.5)(conv3)
+        drop3 = Dropout(0.2)(conv3)
         x = drop3
         for i in range(block_number):
             fn_cur = filter_num*(2**(block_number - i - 1))
@@ -307,6 +308,7 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
 
             conv8 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(merge8)
             conv8 = Conv2D(fn_cur, (3, 3), activation='relu', padding='same')(conv8)
+            conv8 = Dropout(0.2)(conv8)
             conv8 = BatchNormalization()(conv8)
 
             x = conv8
@@ -330,13 +332,13 @@ else :
     model_dir = 'F:/Diploma/models/'
 
 if cluster_mode :
-    os.environ["CUDA_VISIBLE_DEVICES"]="3"
+    os.environ["CUDA_VISIBLE_DEVICES"]="2"
 
 
 build_model = True
 calculate_metrics = True
 show_predictions = True
-model_path = 'F:/Diploma/code/models/model_four_channel_7'
+model_path = 'F:/Diploma/code/models/model_stokes_2'
 
 augment = True
 
@@ -344,9 +346,9 @@ img_size = (512, 608)
 #img_size = (128, 152)
 num_classes = 2
 batch_size = 12
-num_epochs = 30
+num_epochs = 40
 
-input_type = InputType.STOKES_CALC
+input_type = InputType.STOKES
 
 images = sorted(
     [
@@ -458,8 +460,8 @@ if True:
     
     # Generate predictions for all images in the validation set
     
-    val_gen = WindowImages(val_images, val_masks, input_type=input_type, batch_size=1, img_size=img_size, augment=False)
-    #val_gen = WindowImages(train_images, train_masks, input_type=input_type, batch_size=1, img_size=img_size, augment=False)
+    #val_gen = WindowImages(val_images, val_masks, input_type=input_type, batch_size=1, img_size=img_size, augment=False)
+    val_gen = WindowImages(train_images, train_masks, input_type=input_type, batch_size=1, img_size=img_size, augment=False)
     
             
     if show_predictions and not cluster_mode :
@@ -514,16 +516,18 @@ if True:
         
         for ax, j in zip(grid, range(i, i + num_of_vals * 3)) :
             if j%3 == 0 :
-                img = load_img(val_images[j // 3], target_size=img_size)
+                img = load_img(train_images[j // 3], target_size=img_size)
                 ax.imshow(img)
             elif j%3 == 1 :
-                img = PIL.ImageOps.autocontrast(load_img(val_masks[j // 3]))
+                img = PIL.ImageOps.autocontrast(load_img(train_masks[j // 3]))
                 ax.imshow(img)
             else :
                 ax.imshow(get_mask(j // 3))
                 
 
         if calculate_metrics :
+            
+        
         
             num_of_preds = len(val_preds)
             pr_sum = 0.0
@@ -532,6 +536,9 @@ if True:
             
         
             for i in range(num_of_preds):
+                
+                if i > 3:
+                    break
                 
                 (pr, re, f1) = get_metrics(i)
             
