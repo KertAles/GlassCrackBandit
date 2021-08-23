@@ -309,6 +309,7 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
         fn_cur = filter_num*(2**(block_number))
         conv3 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(x)
         conv3 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(conv3)
+        conv3 = BatchNormalization()(conv3)
         drop3 = Dropout(0.5)(conv3)
         x = drop3
         for i in range(block_number):
@@ -319,6 +320,7 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
 
             conv8 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(merge8)
             conv8 = Conv2D(fn_cur, (3, 3), activation='relu', padding='same')(conv8)
+            conv8 = BatchNormalization()(conv8)
 
             x = conv8
 
@@ -347,7 +349,7 @@ if cluster_mode :
 build_model = True
 calculate_metrics = True
 show_predictions = True
-model_path = 'F:/Diploma/code/models/model_four_channel_3'
+model_path = 'F:/Diploma/code/models/model_four_channel_5'
 
 augment = True
 
@@ -424,7 +426,7 @@ if True:
         inputs, outputs, model = unet_model_blocks(input_type=input_type, block_number=4, filter_number=16)
             
         #model.summary()
-        model.compile(optimizer="adam", loss=SparseCategoricalFocalLoss(gamma=2, from_logits=True), metrics=["sparse_categorical_accuracy"])
+        model.compile(optimizer="adam", loss=SparseCategoricalFocalLoss(gamma=2), metrics=["sparse_categorical_accuracy"])
             
         # Train the model, doing validation at the end of each epoch.
         epochs = num_epochs
