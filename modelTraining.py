@@ -19,8 +19,6 @@ from tensorflow.keras.layers import BatchNormalization, Conv2D, MaxPooling2D, Dr
 import pandas as pd
 from focal_loss import SparseCategoricalFocalLoss
 
-import sklearn.metrics as metr
-
 
 import PIL
 from PIL import ImageOps
@@ -332,7 +330,7 @@ else :
     model_dir = 'F:/Diploma/models/'
 
 if cluster_mode :
-    os.environ["CUDA_VISIBLE_DEVICES"]="1"
+    os.environ["CUDA_VISIBLE_DEVICES"]="2"
 
 
 build_model = True
@@ -346,9 +344,9 @@ img_size = (512, 608)
 #img_size = (128, 152)
 num_classes = 2
 batch_size = 12
-num_epochs = 20
+num_epochs = 25
 
-input_type = InputType.STOKES_CALC
+input_type = InputType.STOKES_CALC_PLUS
 
 images = sorted(
     [
