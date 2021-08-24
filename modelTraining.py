@@ -311,7 +311,7 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
 
             x = conv8
 
-        conv10 = Conv2D(num_classes, (1,1), activation='softmax', padding="same")(x)
+        conv10 = Conv2D(num_classes, (3,3), activation='softmax', padding="same")(x)
         
         model = keras.Model(inputs, conv10)
 
@@ -334,19 +334,19 @@ if cluster_mode :
 
 
 build_model = True
-calculate_metrics = True
+calculate_metrics = False
 show_predictions = True
-model_path = 'F:/Diploma/code/models/model_four_channel_3'
+model_path = 'F:/Diploma/code/models/model_stokes_calc_5'
 
 augment = True
 
 img_size = (512, 608)
 #img_size = (128, 152)
 num_classes = 2
-batch_size = 12
-num_epochs = 40
+batch_size = 16
+num_epochs = 30
 
-input_type = InputType.AVERAGE
+input_type = InputType.FOUR_CHANNEL
 
 images = sorted(
     [
@@ -410,11 +410,13 @@ if True:
         # Build model
         #model = get_model(img_size, num_classes, input_type=input_type)
         
-        inputs, outputs, model = unet_model_blocks(input_type=input_type, block_number=4, filter_number=16)
+        inputs, outputs, model = unet_model_blocks(input_type=input_type, block_number=3, filter_number=8)
             
         #model.summary()
         model.compile(optimizer="adam", loss=SparseCategoricalFocalLoss(gamma=3), metrics=["sparse_categorical_accuracy"])
             
+        model.summary()
+        
         # Train the model, doing validation at the end of each epoch.
         epochs = num_epochs
         
