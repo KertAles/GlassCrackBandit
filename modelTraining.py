@@ -227,7 +227,7 @@ class WindowImages(keras.utils.Sequence):
                 img = np.concatenate((gray, self.calculateDegAngOfPol(stokes)), axis=-1)
                 
                 
-            if self.input_type == InputType.FOUR_CHANNEL or self.input_type == InputType.AVERAGE:
+            if self.input_type == InputType.FOUR_CHANNEL:
                 """
                 mean = np.mean(img)
                 std = 3 * np.std(img)
@@ -343,7 +343,7 @@ else :
     model_dir = 'F:/Diploma/models/'
 
 if cluster_mode :
-    os.environ["CUDA_VISIBLE_DEVICES"]="3"
+    os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 
 build_model = True
@@ -359,7 +359,7 @@ num_classes = 2
 batch_size = 12
 num_epochs = 60
 
-input_type = InputType.STOKES_CALC_PLUS
+input_type = InputType.AVERAGE
 
 images = sorted(
     [
