@@ -347,7 +347,7 @@ if cluster_mode :
 
 
 build_model = True
-calculate_metrics = False
+calculate_metrics = True
 show_predictions = True
 model_path = 'F:/Diploma/code/models/model_stokes_calc_plus_3'
 
