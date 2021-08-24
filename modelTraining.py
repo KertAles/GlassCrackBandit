@@ -336,7 +336,7 @@ if cluster_mode :
 build_model = True
 calculate_metrics = False
 show_predictions = True
-model_path = 'F:/Diploma/code/models/model_stokes_calc_5'
+model_path = 'F:/Diploma/code/models/model_four_channel_7'
 
 augment = True
 
@@ -344,7 +344,7 @@ img_size = (512, 608)
 #img_size = (128, 152)
 num_classes = 2
 batch_size = 16
-num_epochs = 30
+num_epochs = 40
 
 input_type = InputType.FOUR_CHANNEL
 
@@ -410,7 +410,7 @@ if True:
         # Build model
         #model = get_model(img_size, num_classes, input_type=input_type)
         
-        inputs, outputs, model = unet_model_blocks(input_type=input_type, block_number=3, filter_number=8)
+        inputs, outputs, model = unet_model_blocks(input_type=input_type, block_number=4, filter_number=8)
             
         #model.summary()
         model.compile(optimizer="adam", loss=SparseCategoricalFocalLoss(gamma=3), metrics=["sparse_categorical_accuracy"])
