@@ -235,7 +235,7 @@ class WindowImages(keras.utils.Sequence):
                 img = (img - (mean - std))
                 img = ((img / (mean + std)) * 2) - 1
                 """
-                img = (img - img.min)
+                img = (img - img.min())
                 img = ((img / img.max()) * 2) - 1
             else :
                 for i in range(img.shape[2]) :
@@ -247,7 +247,7 @@ class WindowImages(keras.utils.Sequence):
                     img[:,:,i] = ((img[:,:,i] / (mean + std)) * 2) - 1
                     """
                     
-                    img[:,:,i] = (img[:,:,i] - img[:,:,i].min)
+                    img[:,:,i] = (img[:,:,i] - img[:,:,i].min())
                     img[:,:,i] = ((img[:,:,i] / img[:,:,i].max()) * 2) - 1
                     #print('POST ::: Mean: ' + str(np.mean(img[:, :, i])) + ' | Min: ' + str(img[:, :, i].min()) + ' | Max: ' + str(img[:, :, i].max())  + ' | Std: ' + str(np.std(img[:, :, i])) )
             
