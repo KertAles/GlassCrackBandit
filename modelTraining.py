@@ -211,17 +211,17 @@ class WindowImages(keras.utils.Sequence):
                     subImgs = self.applyAugmentation(subImgs)
                 
             if self.input_type == InputType.STOKES :
-                subImgs = ndimage.gaussian_filter(subImgs, sigma=0.7)
+                subImgs = ndimage.gaussian_filter(subImgs, sigma=0.8)
                 img = self.extract_stokes(subImgs)
             elif self.input_type == InputType.STOKES_CALC :
-                subImgs = ndimage.gaussian_filter(subImgs, sigma=0.7)
+                subImgs = ndimage.gaussian_filter(subImgs, sigma=0.8)
                 stokes = self.extract_stokes(subImgs)
                 
                 img = self.calculateDegAngOfPol(stokes)
             elif self.input_type == InputType.STOKES_CALC_PLUS :
                 gray = (subImgs[0] + subImgs[1] + subImgs[2] + subImgs[3]) / 4
                 
-                subImgs = ndimage.gaussian_filter(subImgs, sigma=0.7)
+                subImgs = ndimage.gaussian_filter(subImgs, sigma=0.8)
                 stokes = self.extract_stokes(subImgs)
                 
                 img = np.concatenate((gray, self.calculateDegAngOfPol(stokes)), axis=-1)
@@ -345,15 +345,15 @@ if cluster_mode :
 build_model = True
 calculate_metrics = False
 show_predictions = True
-model_path = 'F:/Diploma/code/models/model_average_9'
+model_path = 'F:/Diploma/code/models/model_average_11'
 
 augment = True
 
 img_size = (512, 608)
 #img_size = (128, 152)
 num_classes = 2
-batch_size = 16
-num_epochs = 30
+batch_size = 12
+num_epochs = 40
 
 input_type = InputType.AVERAGE
 
@@ -395,7 +395,7 @@ val_gen = WindowImages(val_images, val_masks, input_type=input_type, batch_size=
 """
 imgs = train_gen.__getitem__(0)
 
-fig = plt.figure(figsize=(60., 60.))
+fig = plt.figure(figsize=(70., 70.))
 grid = ImageGrid(fig, 111, 
                  nrows_ncols=(3, 3),  # creates 2x2 grid of axes
                  axes_pad=0.1,  # pad between axes
@@ -405,15 +405,10 @@ for ax, j in zip(grid, range(9)) :
     img = imgs[0][j//3]
     ax.imshow(img[:,:,j%3])
       
+
 """
 
 
-
-"""
-#data_gen = WindowImages(images, masks, input_type=input_type, batch_size=batch_size, img_size=img_size)
-tf.config.experimental.set_per_process_memory_fraction(0.75)
-tf.config.experimental.set_per_process_memory_growth(True)
-"""
 if True:
     if build_model :
         # Build model
