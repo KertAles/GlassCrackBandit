@@ -72,9 +72,9 @@ class WindowImages(keras.utils.Sequence):
         w = channels[0].shape[1]
         
         stokes = np.zeros((h, w, 3))
-        stokes[:, :, 0] = (channels[0][:, :, 0] +  channels[1][:, :, 0]) / 2
-        stokes[:, :, 1] = (channels[0][:, :, 0] -  channels[1][:, :, 0] + 255) / 2
-        stokes[:, :, 2] = (channels[2][:, :, 0] -  channels[3][:, :, 0] + 255) / 2
+        stokes[:, :, 0] = (channels[0][:, :, 0] +  channels[1][:, :, 0])
+        stokes[:, :, 1] = (channels[0][:, :, 0] -  channels[1][:, :, 0])
+        stokes[:, :, 2] = (channels[2][:, :, 0] -  channels[3][:, :, 0])
         
         return stokes
     
@@ -227,7 +227,7 @@ class WindowImages(keras.utils.Sequence):
                 img = np.concatenate((gray, self.calculateDegAngOfPol(stokes)), axis=-1)
                 
                 
-            if self.input_type == InputType.FOUR_CHANNEL:
+            if self.input_type == InputType.FOUR_CHANNEL or self.input_type == InputType.AVERAGE:
                 """
                 mean = np.mean(img)
                 std = 3 * np.std(img)
@@ -235,7 +235,8 @@ class WindowImages(keras.utils.Sequence):
                 img = (img - (mean - std))
                 img = ((img / (mean + std)) * 2) - 1
                 """
-                img = (img - img.min())
+                
+                img = img - img.min()
                 img = ((img / img.max()) * 2) - 1
             else :
                 for i in range(img.shape[2]) :
@@ -245,11 +246,14 @@ class WindowImages(keras.utils.Sequence):
                     
                     img[:,:,i] = (img[:,:,i] - (mean - std))
                     img[:,:,i] = ((img[:,:,i] / (mean + std)) * 2) - 1
+                    
                     """
+                    
                     
                     img[:,:,i] = (img[:,:,i] - img[:,:,i].min())
                     img[:,:,i] = ((img[:,:,i] / img[:,:,i].max()) * 2) - 1
-                    #print('POST ::: Mean: ' + str(np.mean(img[:, :, i])) + ' | Min: ' + str(img[:, :, i].min()) + ' | Max: ' + str(img[:, :, i].max())  + ' | Std: ' + str(np.std(img[:, :, i])) )
+                    
+                    #print(str(i) + ':   POST ::: Mean: '+ str(np.mean(img[:, :, i])) + ' | Min: ' + str(img[:, :, i].min()) + ' | Max: ' + str(img[:, :, i].max())  + ' | Std: ' + str(np.std(img[:, :, i])) )
             
             #print('ALLTOGETHER ::: Mean: ' + str(np.mean(img)) + ' | Min: ' + str(img.min()) + ' | Max: ' + str(img.max())  + ' | Std: ' + str(np.std(img)) )
             
@@ -339,13 +343,13 @@ else :
     model_dir = 'F:/Diploma/models/'
 
 if cluster_mode :
-    os.environ["CUDA_VISIBLE_DEVICES"]="3"
+    os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 
 build_model = True
 calculate_metrics = False
 show_predictions = True
-model_path = 'F:/Diploma/code/models/model_average_11'
+model_path = 'F:/Diploma/code/models/model_stokes_calc_plus_3'
 
 augment = True
 
@@ -353,9 +357,9 @@ img_size = (512, 608)
 #img_size = (128, 152)
 num_classes = 2
 batch_size = 12
-num_epochs = 40
+num_epochs = 60
 
-input_type = InputType.STOKES_CALC_PLUS
+input_type = InputType.STOKES
 
 images = sorted(
     [
@@ -392,7 +396,6 @@ val_masks = masks[-val_samples:]
 train_gen = WindowImages(train_images, train_masks, input_type=input_type, batch_size=batch_size, img_size=img_size, augment=augment)
 val_gen = WindowImages(val_images, val_masks, input_type=input_type, batch_size=batch_size, img_size=img_size, augment=augment)
 
-"""
 imgs = train_gen.__getitem__(0)
 
 fig = plt.figure(figsize=(70., 70.))
@@ -550,3 +553,4 @@ if True:
             
             print('AVERAGE ::: Precision: ' + str(pr_sum / num_of_preds) + ' ;  ' + 'Recall: ' + str(re_sum / num_of_preds) + ' ;  ' + 'F1: ' + str(f1_sum / num_of_preds))
     
+"""
