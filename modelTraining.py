@@ -343,7 +343,7 @@ else :
     model_dir = 'F:/Diploma/models/'
 
 if cluster_mode :
-    os.environ["CUDA_VISIBLE_DEVICES"]="2"
+    os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 
 build_model = True
@@ -359,7 +359,7 @@ num_classes = 2
 batch_size = 12
 num_epochs = 60
 
-input_type = InputType.STOKES
+input_type = InputType.AVERAGE
 
 images = sorted(
     [
@@ -395,6 +395,8 @@ val_masks = masks[-val_samples:]
 # Instantiate data Sequences for each split
 train_gen = WindowImages(train_images, train_masks, input_type=input_type, batch_size=batch_size, img_size=img_size, augment=augment)
 val_gen = WindowImages(val_images, val_masks, input_type=input_type, batch_size=batch_size, img_size=img_size, augment=augment)
+
+"""
 
 imgs = train_gen.__getitem__(0)
 
@@ -553,4 +555,3 @@ if True:
             
             print('AVERAGE ::: Precision: ' + str(pr_sum / num_of_preds) + ' ;  ' + 'Recall: ' + str(re_sum / num_of_preds) + ' ;  ' + 'F1: ' + str(f1_sum / num_of_preds))
     
-"""
