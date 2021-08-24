@@ -324,7 +324,7 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
 
             x = conv8
 
-        conv10 = Conv2D(num_classes, (3,3), activation='softmax', padding="same")(x)
+        conv10 = Conv2D(num_classes, (1,1), activation='softmax', padding="same")(x)
         
         model = keras.Model(inputs, conv10)
 
@@ -347,9 +347,9 @@ if cluster_mode :
 
 
 build_model = True
-calculate_metrics = True
+calculate_metrics = False
 show_predictions = True
-model_path = 'F:/Diploma/code/models/model_stokes_calc_plus_3'
+model_path = 'F:/Diploma/code/models/model_stokes_calc_plus_5'
 
 augment = True
 
@@ -359,7 +359,7 @@ num_classes = 2
 batch_size = 12
 num_epochs = 60
 
-input_type = InputType.AVERAGE
+input_type = InputType.STOKES_CALC_PLUS
 
 images = sorted(
     [
