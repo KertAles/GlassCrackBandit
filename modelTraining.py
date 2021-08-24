@@ -228,18 +228,27 @@ class WindowImages(keras.utils.Sequence):
                 
                 
             if self.input_type == InputType.FOUR_CHANNEL:
+                """
                 mean = np.mean(img)
                 std = 3 * np.std(img)
                     
                 img = (img - (mean - std))
-                img = ((img / (mean + std)) * 2) - 1 
+                img = ((img / (mean + std)) * 2) - 1
+                """
+                img = (img - img.min)
+                img = ((img / img.max()) * 2) - 1
             else :
                 for i in range(img.shape[2]) :
+                    """
                     mean = np.mean(img[:, :, i])
                     std = 2 * np.std(img[:, :, i])
                     
                     img[:,:,i] = (img[:,:,i] - (mean - std))
                     img[:,:,i] = ((img[:,:,i] / (mean + std)) * 2) - 1
+                    """
+                    
+                    img[:,:,i] = (img[:,:,i] - img[:,:,i].min)
+                    img[:,:,i] = ((img[:,:,i] / img[:,:,i].max()) * 2) - 1
                     #print('POST ::: Mean: ' + str(np.mean(img[:, :, i])) + ' | Min: ' + str(img[:, :, i].min()) + ' | Max: ' + str(img[:, :, i].max())  + ' | Std: ' + str(np.std(img[:, :, i])) )
             
             #print('ALLTOGETHER ::: Mean: ' + str(np.mean(img)) + ' | Min: ' + str(img.min()) + ' | Max: ' + str(img.max())  + ' | Std: ' + str(np.std(img)) )
@@ -287,7 +296,7 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
             conv1 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(x)
             conv1 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(conv1)
             conv1 = Dropout(0.2)(conv1)
-            conv1 = BatchNormalization()(conv1)
+            #conv1 = BatchNormalization()(conv1)
             block_features.append(conv1)
             pool1 = MaxPooling2D(pool_size=(2, 2))(conv1)
             x = pool1
@@ -295,7 +304,7 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
         fn_cur = filter_num*(2**(block_number))
         conv3 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(x)
         conv3 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(conv3)
-        conv3 = BatchNormalization()(conv3)
+        #conv3 = BatchNormalization()(conv3)
         drop3 = Dropout(0.2)(conv3)
         x = drop3
         for i in range(block_number):
@@ -307,7 +316,7 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
             conv8 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(merge8)
             conv8 = Conv2D(fn_cur, (3, 3), activation='relu', padding='same')(conv8)
             conv8 = Dropout(0.2)(conv8)
-            conv8 = BatchNormalization()(conv8)
+            #conv8 = BatchNormalization()(conv8)
 
             x = conv8
 
@@ -336,7 +345,7 @@ if cluster_mode :
 build_model = True
 calculate_metrics = False
 show_predictions = True
-model_path = 'F:/Diploma/code/models/model_average_7'
+model_path = 'F:/Diploma/code/models/model_average_9'
 
 augment = True
 
@@ -344,7 +353,7 @@ img_size = (512, 608)
 #img_size = (128, 152)
 num_classes = 2
 batch_size = 16
-num_epochs = 20
+num_epochs = 30
 
 input_type = InputType.AVERAGE
 
@@ -410,10 +419,10 @@ if True:
         # Build model
         #model = get_model(img_size, num_classes, input_type=input_type)
         
-        inputs, outputs, model = unet_model_blocks(input_type=input_type, block_number=4, filter_number=8)
+        inputs, outputs, model = unet_model_blocks(input_type=input_type, block_number=4, filter_number=16)
             
         #model.summary()
-        model.compile(optimizer="adam", loss=SparseCategoricalFocalLoss(gamma=3), metrics=["sparse_categorical_accuracy"])
+        model.compile(optimizer="adam", loss=SparseCategoricalFocalLoss(gamma=2), metrics=["sparse_categorical_accuracy"])
             
         model.summary()
         
