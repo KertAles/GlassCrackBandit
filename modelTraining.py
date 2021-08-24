@@ -339,7 +339,7 @@ else :
     model_dir = 'F:/Diploma/models/'
 
 if cluster_mode :
-    os.environ["CUDA_VISIBLE_DEVICES"]="1"
+    os.environ["CUDA_VISIBLE_DEVICES"]="3"
 
 
 build_model = True
@@ -355,7 +355,7 @@ num_classes = 2
 batch_size = 12
 num_epochs = 40
 
-input_type = InputType.STOKES
+input_type = InputType.STOKES_CALC_PLUS
 
 images = sorted(
     [
