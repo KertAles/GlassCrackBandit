@@ -338,7 +338,7 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
         fn_cur = filter_num*(2**(block_number))
         conv3 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(x)
         conv3 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(conv3)
-        #conv3 = BatchNormalization()(conv3)
+        conv3 = BatchNormalization()(conv3)
         drop3 = Dropout(0.2)(conv3)
         x = drop3
         for i in range(block_number):
@@ -381,7 +381,7 @@ if cluster_mode :
 build_model = True
 calculate_metrics = True
 show_predictions = True
-model_path = 'F:/Diploma/code/models/model_four_channel_23'
+model_path = 'F:/Diploma/code/models/model_four_channel_25'
 
 augment = True
 
@@ -389,9 +389,9 @@ img_size = (512, 608)
 #img_size = (128, 152)
 num_classes = 2
 batch_size = 12
-num_epochs = 60
+num_epochs = 70
 
-input_type = InputType.FOUR_CHANNEL
+input_type = InputType.AVERAGE
 
 """
 images = sorted(
