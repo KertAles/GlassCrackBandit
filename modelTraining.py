@@ -411,7 +411,7 @@ val_masks = masks[-val_samples:]
 train_gen = WindowImages(train_images, train_masks, input_type=input_type, batch_size=batch_size, img_size=img_size, augment=augment)
 val_gen = WindowImages(val_images, val_masks, input_type=input_type, batch_size=batch_size, img_size=img_size, augment=augment)
 
-
+"""
 
 imgs = train_gen.__getitem__(0)
 
@@ -460,7 +460,7 @@ if True:
         ]
         
         model_type_num = str(len(model_names) + 1)
-        model_path = model_dir + 'model_' + input_type.value + '_' + model_type_num
+        model_path = model_dir + 'model0_' + input_type.value + '_' + model_type_num
         
         model.save(model_path)
         
@@ -468,7 +468,7 @@ if True:
         hist_df = pd.DataFrame(history.history) 
         
         # save to json:  
-        hist_json_file = model_dir + 'history_' + input_type.value + '_' + model_type_num + '.json' 
+        hist_json_file = model_dir + 'history0_' + input_type.value + '_' + model_type_num + '.json' 
         with open(hist_json_file, mode='w') as f:
             hist_df.to_json(f)
                 
@@ -571,4 +571,3 @@ if True:
         
             
             print('AVERAGE ::: Precision: ' + str(pr_sum / num_of_preds) + ' ;  ' + 'Recall: ' + str(re_sum / num_of_preds) + ' ;  ' + 'F1: ' + str(f1_sum / num_of_preds))
-"""
