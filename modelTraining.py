@@ -346,11 +346,11 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
             up8 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(
                 UpSampling2D(size=(2, 2))(x))
             merge8 = concatenate([block_features.pop(), up8], axis=3)
-            merge8 = Dropout(0.2)(merge8)
+            
             conv8 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(merge8)
             conv8 = Conv2D(fn_cur, (3, 3), activation='relu', padding='same')(conv8)
             #conv8 = BatchNormalization()(conv8)
-
+            conv8 = Dropout(0.2)(conv8)
             x = conv8
 
         conv10 = Conv2D(num_classes, (3,3), activation='softmax', padding="same")(x)
@@ -374,13 +374,13 @@ else :
     model_dir = 'F:/Diploma/models/'
 
 if cluster_mode :
-    os.environ["CUDA_VISIBLE_DEVICES"]="2"
+    os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 
 build_model = True
 calculate_metrics = True
 show_predictions = True
-model_path = 'F:/Diploma/code/models/model_four_channel_25'
+model_path = 'F:/Diploma/code/models/model_average_17'
 
 augment = True
 
@@ -388,9 +388,9 @@ img_size = (512, 608)
 #img_size = (128, 152)
 num_classes = 2
 batch_size = 12
-num_epochs = 60
+num_epochs = 70
 
-input_type = InputType.STOKES_CALC_PLUS
+input_type = InputType.AVERAGE
 
 """
 images = sorted(
