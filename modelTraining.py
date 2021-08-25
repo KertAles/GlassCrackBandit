@@ -81,6 +81,14 @@ class WindowImages(keras.utils.Sequence):
             
         return subImgs
     
+    
+    def load_images(self, path) :
+        subImgs = []
+        
+        subImgs[j] = np.array(load_img(path, color_mode="grayscale"))
+        
+        return subImgs
+    
     def extract_stokes(self, channels) :
         h = channels[0].shape[0]
         w = channels[0].shape[1]
@@ -345,14 +353,16 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
         return inputs, conv10, model
     
 
-cluster_mode = True
+cluster_mode = False
 
 if cluster_mode :
-    input_dir = '/storage/local/hdd/dataset/'
+    name_dir = '/storage/local/hdd/dataset/'
+    input_dir = '/storage/local/hdd/dataset_split/'
     target_dir = '/storage/local/hdd/masks_renamed/'
     model_dir = '/home/ales/gcb/GlassCrackBandit/models/'
 else :   
-    input_dir = 'F:/Diploma/dataset/'
+    name_dir = 'F:/Diploma/dataset/'
+    input_dir = 'F:/Diploma/dataset_split/'
     target_dir = 'F:/Diploma/masks_renamed/'
     model_dir = 'F:/Diploma/models/'
 
@@ -375,6 +385,7 @@ num_epochs = 60
 
 input_type = InputType.FOUR_CHANNEL
 
+"""
 images = sorted(
     [
         os.path.join(input_dir, fname)
@@ -382,6 +393,20 @@ images = sorted(
         if fname.endswith(".bmp")
     ]
 )
+
+"""
+
+images = sorted(
+    [
+        os.path.join(input_dir, fname)
+        for fname in os.listdir(name_dir)
+        if fname.endswith(".bmp")
+    ]
+)
+
+print(images)
+
+
 masks = sorted(
     [
         os.path.join(target_dir, fname)
@@ -389,6 +414,7 @@ masks = sorted(
         if fname.endswith(".bmp")
     ]
 )
+
 
 print("Number of samples:", len(images))
 

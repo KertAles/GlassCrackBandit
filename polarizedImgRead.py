@@ -6,19 +6,19 @@ Created on Mon Jul 12 14:58:55 2021
 """
 
 import os
-import cv2 as cv
 import numpy as np
 from PIL import Image
+from tensorflow.keras.preprocessing.image import load_img
 
 
-path = 'F:/Diploma/dataset/'
+path = '/storage/local/hdd/dataset/'
 dataSet = os.listdir(path)
 
 dataSet 
 
 for file in dataSet:
     fileName = file
-    image = cv.imread(os.path.join(path, fileName), 0)
+    image = np.array(load_img(path, color_mode="grayscale"))
     
     h = len(image)
     w = len(image[0])
@@ -53,7 +53,7 @@ for file in dataSet:
         
     subIdx = 1  
     baseName = fileName.split('.')[0] + '_'
-    polarFolder = 'F:/Diploma/dataset_split_half/'
+    polarFolder = '/storage/local/hdd/dataset_split/'
     
     for subImg in subImgs :
         im = Image.fromarray(subImg)
