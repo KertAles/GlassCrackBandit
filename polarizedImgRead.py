@@ -14,11 +14,10 @@ from tensorflow.keras.preprocessing.image import load_img
 path = '/storage/local/hdd/dataset/'
 dataSet = os.listdir(path)
 
-dataSet 
 
 for file in dataSet:
     fileName = file
-    image = np.array(load_img(path, color_mode="grayscale"))
+    image = np.array(load_img(file, color_mode="grayscale"))
     
     h = len(image)
     w = len(image[0])
