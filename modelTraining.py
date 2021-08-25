@@ -9,6 +9,7 @@ import os
 
 import numpy as np
 import tensorflow as tf
+import cv2
 
 from tensorflow import keras
 from tensorflow.keras.preprocessing.image import load_img
@@ -18,10 +19,10 @@ from scipy import ndimage
 from tensorflow.keras.layers import BatchNormalization, Conv2D, MaxPooling2D, Dropout, UpSampling2D, concatenate
 import pandas as pd
 from focal_loss import SparseCategoricalFocalLoss
-
+from skimage.transform import resize
 
 import PIL
-from PIL import ImageOps
+from PIL import ImageOps, Image
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import ImageGrid
 
@@ -58,12 +59,26 @@ class WindowImages(keras.utils.Sequence):
                 subImgs.append(np.zeros((h0, w0)))
         
             for j in range(0, d) :
-                x = np.array(list(range(0, w, d))) + j
-                y = np.array(list(range(0, h, d))) + j
-        
-                subImgs[j] = np.expand_dims(image[np.ix_(y,x)], axis=-1)
+                if j == 0:
+                    x = np.array(list(range(1, w, 2)))
+                    y = np.array(list(range(1, h, 2)))
+                if j == 1:
+                    x = np.array(list(range(0, w, 2)))
+                    y = np.array(list(range(0, h, 2)))
+                if j == 2:
+                    x = np.array(list(range(0, w, 2)))
+                    y = np.array(list(range(1, h, 2))) 
+                if j == 3:
+                    x = np.array(list(range(1, w, 2)))
+                    y = np.array(list(range(0, h, 2)))
+                    
+                    
+                subImgs[j] = np.expand_dims(resize(image[np.ix_(y,x)], self.img_size), axis=-1)
+                
         else :
             print('Picture of invalid size')
+            
+        
             
         return subImgs
     
@@ -72,9 +87,9 @@ class WindowImages(keras.utils.Sequence):
         w = channels[0].shape[1]
         
         stokes = np.zeros((h, w, 3))
-        stokes[:, :, 0] = (channels[0][:, :, 0] +  channels[1][:, :, 0])
-        stokes[:, :, 1] = (channels[0][:, :, 0] -  channels[1][:, :, 0])
-        stokes[:, :, 2] = (channels[2][:, :, 0] -  channels[3][:, :, 0])
+        stokes[:, :, 0] = (channels[0][:, :, 0] +  channels[1][:, :, 0]) / 2
+        stokes[:, :, 1] = (channels[0][:, :, 0] -  channels[1][:, :, 0] + 255) / 2
+        stokes[:, :, 2] = (channels[2][:, :, 0] -  channels[3][:, :, 0] + 255) / 2
         
         return stokes
     
@@ -347,9 +362,9 @@ if cluster_mode :
 
 
 build_model = True
-calculate_metrics = False
+calculate_metrics = True
 show_predictions = True
-model_path = 'F:/Diploma/code/models/model_stokes_calc_plus_5'
+model_path = 'F:/Diploma/code/models/model_four_channel_19'
 
 augment = True
 
@@ -359,7 +374,7 @@ num_classes = 2
 batch_size = 12
 num_epochs = 60
 
-input_type = InputType.FOUR_CHANNEL
+input_type = InputType.STOKES_CALC_PLUS
 
 images = sorted(
     [
@@ -396,9 +411,11 @@ val_masks = masks[-val_samples:]
 train_gen = WindowImages(train_images, train_masks, input_type=input_type, batch_size=batch_size, img_size=img_size, augment=augment)
 val_gen = WindowImages(val_images, val_masks, input_type=input_type, batch_size=batch_size, img_size=img_size, augment=augment)
 
-"""
+
 
 imgs = train_gen.__getitem__(0)
+
+
 
 fig = plt.figure(figsize=(70., 70.))
 grid = ImageGrid(fig, 111, 
@@ -409,7 +426,7 @@ grid = ImageGrid(fig, 111,
 for ax, j in zip(grid, range(9)) :
     img = imgs[0][j//3]
     ax.imshow(img[:,:,j%3])
-      
+
 
 """
 
@@ -554,4 +571,4 @@ if True:
         
             
             print('AVERAGE ::: Precision: ' + str(pr_sum / num_of_preds) + ' ;  ' + 'Recall: ' + str(re_sum / num_of_preds) + ' ;  ' + 'F1: ' + str(f1_sum / num_of_preds))
-    
+"""
