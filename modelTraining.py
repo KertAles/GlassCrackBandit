@@ -300,7 +300,7 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
             conv1 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(x)
             conv1 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(conv1)
             conv1 = Dropout(0.2)(conv1)
-            #conv1 = BatchNormalization()(conv1)
+            conv1 = BatchNormalization()(conv1)
             block_features.append(conv1)
             pool1 = MaxPooling2D(pool_size=(2, 2))(conv1)
             x = pool1
@@ -308,7 +308,7 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
         fn_cur = filter_num*(2**(block_number))
         conv3 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(x)
         conv3 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(conv3)
-        #conv3 = BatchNormalization()(conv3)
+        conv3 = BatchNormalization()(conv3)
         drop3 = Dropout(0.2)(conv3)
         x = drop3
         for i in range(block_number):
@@ -320,11 +320,11 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
             conv8 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(merge8)
             conv8 = Conv2D(fn_cur, (3, 3), activation='relu', padding='same')(conv8)
             conv8 = Dropout(0.2)(conv8)
-            #conv8 = BatchNormalization()(conv8)
+            conv8 = BatchNormalization()(conv8)
 
             x = conv8
 
-        conv10 = Conv2D(num_classes, (1,1), activation='softmax', padding="same")(x)
+        conv10 = Conv2D(num_classes, (3,3), activation='softmax', padding="same")(x)
         
         model = keras.Model(inputs, conv10)
 
