@@ -9,7 +9,6 @@ import os
 
 import numpy as np
 import tensorflow as tf
-import cv2
 
 from tensorflow import keras
 from tensorflow.keras.preprocessing.image import load_img
@@ -358,7 +357,7 @@ else :
     model_dir = 'F:/Diploma/models/'
 
 if cluster_mode :
-    os.environ["CUDA_VISIBLE_DEVICES"]="3"
+    os.environ["CUDA_VISIBLE_DEVICES"]="2"
 
 
 build_model = True
