@@ -338,7 +338,7 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
         fn_cur = filter_num*(2**(block_number))
         conv3 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(x)
         conv3 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(conv3)
-        conv3 = BatchNormalization()(conv3)
+        #conv3 = BatchNormalization()(conv3)
         drop3 = Dropout(0.2)(conv3)
         x = drop3
         for i in range(block_number):
@@ -381,7 +381,7 @@ if cluster_mode :
 build_model = True
 calculate_metrics = True
 show_predictions = True
-model_path = 'F:/Diploma/code/models/model_four_channel_21'
+model_path = 'F:/Diploma/code/models/model_four_channel_23'
 
 augment = True
 
@@ -491,7 +491,7 @@ if True:
         ]
         
         model_type_num = str(len(model_names) + 1)
-        model_path = model_dir + 'model0_' + input_type.value + '_' + model_type_num
+        model_path = model_dir + 'model_' + input_type.value + '_' + model_type_num
         
         model.save(model_path)
         
@@ -499,7 +499,7 @@ if True:
         hist_df = pd.DataFrame(history.history) 
         
         # save to json:  
-        hist_json_file = model_dir + 'history0_' + input_type.value + '_' + model_type_num + '.json' 
+        hist_json_file = model_dir + 'history_' + input_type.value + '_' + model_type_num + '.json' 
         with open(hist_json_file, mode='w') as f:
             hist_df.to_json(f)
                 
