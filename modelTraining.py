@@ -391,7 +391,7 @@ num_classes = 2
 batch_size = 12
 num_epochs = 60
 
-input_type = InputType.FOUR_CHANNEL
+input_type = InputType.STOKES_CALC_PLUS
 
 """
 images = sorted(
@@ -491,7 +491,7 @@ if True:
         ]
         
         model_type_num = str(len(model_names) + 1)
-        model_path = model_dir + 'model_' + input_type.value + '_' + model_type_num
+        model_path = model_dir + 'model0_' + input_type.value + '_' + model_type_num
         
         model.save(model_path)
         
@@ -499,7 +499,7 @@ if True:
         hist_df = pd.DataFrame(history.history) 
         
         # save to json:  
-        hist_json_file = model_dir + 'history_' + input_type.value + '_' + model_type_num + '.json' 
+        hist_json_file = model_dir + 'history0_' + input_type.value + '_' + model_type_num + '.json' 
         with open(hist_json_file, mode='w') as f:
             hist_df.to_json(f)
                 
