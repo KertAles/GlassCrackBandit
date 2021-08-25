@@ -85,7 +85,15 @@ class WindowImages(keras.utils.Sequence):
     def load_images(self, path) :
         subImgs = []
         
-        subImgs[j] = np.array(load_img(path, color_mode="grayscale"))
+        path_split = path.split('.')
+        
+        for j in range(0, 4) : 
+            subImgs.append(np.zeros((self.img_size[0], self.img_size[1])))
+        
+        subImgs[0] = np.expand_dims((np.array(load_img(path_split[0] + '_01.' + path_split[1], color_mode="grayscale"))), axis =-1)
+        subImgs[1] = np.expand_dims((np.array(load_img(path_split[0] + '_02.' + path_split[1], color_mode="grayscale"))), axis =-1)
+        subImgs[2] = np.expand_dims((np.array(load_img(path_split[0] + '_03.' + path_split[1], color_mode="grayscale"))), axis =-1)
+        subImgs[3] = np.expand_dims((np.array(load_img(path_split[0] + '_04.' + path_split[1], color_mode="grayscale"))), axis =-1)
         
         return subImgs
     
@@ -208,7 +216,7 @@ class WindowImages(keras.utils.Sequence):
         x = np.zeros((len(batch_images),) + self.img_size + num_of_channels, dtype="float32")
   
         for j, path in enumerate(batch_images):
-            subImgs = self.deinterlace(path)
+            subImgs = self.load_images(path)
             
             if self.input_type == InputType.AVERAGE :
                 img = (subImgs[0] + subImgs[1] + subImgs[2] + subImgs[3]) / 4
@@ -353,7 +361,7 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
         return inputs, conv10, model
     
 
-cluster_mode = False
+cluster_mode = True
 
 if cluster_mode :
     name_dir = '/storage/local/hdd/dataset/'
@@ -362,7 +370,7 @@ if cluster_mode :
     model_dir = '/home/ales/gcb/GlassCrackBandit/models/'
 else :   
     name_dir = 'F:/Diploma/dataset/'
-    input_dir = 'F:/Diploma/dataset_split/'
+    input_dir = 'F:/Diploma/dataset_split_half/'
     target_dir = 'F:/Diploma/masks_renamed/'
     model_dir = 'F:/Diploma/models/'
 
@@ -403,8 +411,6 @@ images = sorted(
         if fname.endswith(".bmp")
     ]
 )
-
-print(images)
 
 
 masks = sorted(
