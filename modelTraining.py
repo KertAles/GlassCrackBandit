@@ -330,7 +330,7 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
             conv1 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(x)
             conv1 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(conv1)
             conv1 = Dropout(0.2)(conv1)
-            conv1 = BatchNormalization()(conv1)
+            #conv1 = BatchNormalization()(conv1)
             block_features.append(conv1)
             pool1 = MaxPooling2D(pool_size=(2, 2))(conv1)
             x = pool1
@@ -350,7 +350,7 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
             conv8 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(merge8)
             conv8 = Conv2D(fn_cur, (3, 3), activation='relu', padding='same')(conv8)
             conv8 = Dropout(0.2)(conv8)
-            conv8 = BatchNormalization()(conv8)
+            #conv8 = BatchNormalization()(conv8)
 
             x = conv8
 
@@ -381,7 +381,7 @@ if cluster_mode :
 build_model = True
 calculate_metrics = True
 show_predictions = True
-model_path = 'F:/Diploma/code/models/model_four_channel_19'
+model_path = 'F:/Diploma/code/models/model_four_channel_21'
 
 augment = True
 
@@ -391,7 +391,7 @@ num_classes = 2
 batch_size = 12
 num_epochs = 60
 
-input_type = InputType.STOKES_CALC_PLUS
+input_type = InputType.FOUR_CHANNEL
 
 """
 images = sorted(
@@ -573,7 +573,9 @@ if True:
         
         for ax, j in zip(grid, range(i, i + num_of_vals * 3)) :
             if j%3 == 0 :
-                img = load_img(val_images[j // 3], target_size=img_size)
+                path_split = val_images[j // 3].split('.')
+                
+                img = load_img(path_split[0] + '_01.' + path_split[1], target_size=img_size)
                 ax.imshow(img)
             elif j%3 == 1 :
                 img = PIL.ImageOps.autocontrast(load_img(val_masks[j // 3]))
