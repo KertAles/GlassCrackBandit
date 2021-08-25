@@ -16,8 +16,8 @@ dataSet = os.listdir(path)
 
 
 for file in dataSet:
-    fileName = file
-    image = np.array(load_img(file, color_mode="grayscale"))
+    fileName = path + file
+    image = np.array(load_img(fileName, color_mode="grayscale"))
     
     h = len(image)
     w = len(image[0])
