@@ -102,9 +102,9 @@ class WindowImages(keras.utils.Sequence):
         w = channels[0].shape[1]
         
         stokes = np.zeros((h, w, 3))
-        stokes[:, :, 0] = (channels[0][:, :, 0] +  channels[1][:, :, 0]) / 2
-        stokes[:, :, 1] = (channels[0][:, :, 0] -  channels[1][:, :, 0] + 255) / 2
-        stokes[:, :, 2] = (channels[2][:, :, 0] -  channels[3][:, :, 0] + 255) / 2
+        stokes[:, :, 0] = (channels[0][:, :, 0] +  channels[1][:, :, 0])
+        stokes[:, :, 1] = (channels[0][:, :, 0] -  channels[1][:, :, 0])
+        stokes[:, :, 2] = (channels[2][:, :, 0] -  channels[3][:, :, 0])
         
         return stokes
     
@@ -491,7 +491,7 @@ if True:
         ]
         
         model_type_num = str(len(model_names) + 1)
-        model_path = model_dir + 'model0_' + input_type.value + '_' + model_type_num
+        model_path = model_dir + 'model1_' + input_type.value + '_' + model_type_num
         
         model.save(model_path)
         
@@ -499,7 +499,7 @@ if True:
         hist_df = pd.DataFrame(history.history) 
         
         # save to json:  
-        hist_json_file = model_dir + 'history0_' + input_type.value + '_' + model_type_num + '.json' 
+        hist_json_file = model_dir + 'history1_' + input_type.value + '_' + model_type_num + '.json' 
         with open(hist_json_file, mode='w') as f:
             hist_df.to_json(f)
                 
