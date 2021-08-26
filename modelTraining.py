@@ -241,17 +241,17 @@ class WindowImages(keras.utils.Sequence):
                     subImgs = self.applyAugmentation(subImgs)
                 
             if self.input_type == InputType.STOKES :
-                subImgs = ndimage.gaussian_filter(subImgs, sigma=0.8)
+                #subImgs = ndimage.gaussian_filter(subImgs, sigma=0.8)
                 img = self.extract_stokes(subImgs)
             elif self.input_type == InputType.STOKES_CALC :
-                subImgs = ndimage.gaussian_filter(subImgs, sigma=0.8)
+                #subImgs = ndimage.gaussian_filter(subImgs, sigma=0.8)
                 stokes = self.extract_stokes(subImgs)
                 
                 img = self.calculateDegAngOfPol(stokes)
             elif self.input_type == InputType.STOKES_CALC_PLUS :
                 gray = (subImgs[0] + subImgs[1] + subImgs[2] + subImgs[3]) / 4
                 
-                subImgs = ndimage.gaussian_filter(subImgs, sigma=0.8)
+                #subImgs = ndimage.gaussian_filter(subImgs, sigma=0.8)
                 stokes = self.extract_stokes(subImgs)
                 
                 img = np.concatenate((gray, self.calculateDegAngOfPol(stokes)), axis=-1)
@@ -330,7 +330,6 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
             conv1 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(x)
             conv1 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(conv1)
             conv1 = Dropout(0.2)(conv1)
-            #conv1 = BatchNormalization()(conv1)
             block_features.append(conv1)
             pool1 = MaxPooling2D(pool_size=(2, 2))(conv1)
             x = pool1
@@ -349,7 +348,6 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
             
             conv8 = Conv2D(fn_cur, (3, 3), activation="relu", padding="same")(merge8)
             conv8 = Conv2D(fn_cur, (3, 3), activation='relu', padding='same')(conv8)
-            #conv8 = BatchNormalization()(conv8)
             conv8 = Dropout(0.2)(conv8)
             x = conv8
 
@@ -380,7 +378,7 @@ if cluster_mode :
 build_model = True
 calculate_metrics = True
 show_predictions = True
-model_path = 'F:/Diploma/code/models/model_average_17'
+model_path = 'F:/Diploma/code/models/model_stokes_calc_plus_13'
 
 augment = True
 
@@ -390,7 +388,7 @@ num_classes = 2
 batch_size = 12
 num_epochs = 60
 
-input_type = InputType.STOKES_CALC_PLUS
+input_type = InputType.STOKES
 
 """
 images = sorted(
