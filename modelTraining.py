@@ -380,7 +380,7 @@ if cluster_mode :
 build_model = True
 calculate_metrics = True
 show_predictions = True
-model_path = 'F:/Diploma/code/models/model_stokes_calc_17'
+model_path = 'F:/Diploma/code/models/model_stokes_calc_25'
 
 augment = True
 
@@ -388,7 +388,7 @@ img_size = (512, 608)
 #img_size = (128, 152)
 num_classes = 2
 batch_size = 12
-num_epochs = 100
+num_epochs = 80
 
 input_type = InputType.STOKES_CALC
 
@@ -505,7 +505,7 @@ if True:
     # Generate predictions for all images in the validation set
     
     val_gen = WindowImages(val_images, val_masks, input_type=input_type, batch_size=1, img_size=img_size, augment=False)
-    #val_gen = WindowImages(train_images, train_masks, input_type=input_type, batch_size=1, img_size=img_size, augment=False)
+    #val_gen = WindowImages(train_images[-43:], train_masks[-43:], input_type=input_type, batch_size=1, img_size=img_size, augment=False)
     
             
     if show_predictions and not cluster_mode :
@@ -598,7 +598,7 @@ if True:
         
         # Display results for validation image #10
         i = 0
-        num_of_vals = 10
+        num_of_vals = 43
         
         val_preds = model.predict(val_gen)
         
