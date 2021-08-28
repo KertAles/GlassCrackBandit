@@ -380,7 +380,7 @@ if cluster_mode :
 build_model = True
 calculate_metrics = True
 show_predictions = True
-model_path = 'F:/Diploma/code/models/model_stokes_calc_25'
+model_path = 'F:/Diploma/code/models/model_stokes_calc_27'
 
 augment = True
 
@@ -390,7 +390,7 @@ num_classes = 2
 batch_size = 12
 num_epochs = 80
 
-input_type = InputType.STOKES
+input_type = InputType.STOKES_CALC_PLUS
 
 images = sorted(
     [
