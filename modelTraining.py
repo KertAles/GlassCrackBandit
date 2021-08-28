@@ -19,6 +19,8 @@ from tensorflow.keras.layers import BatchNormalization, Conv2D, MaxPooling2D, Dr
 import pandas as pd
 from focal_loss import SparseCategoricalFocalLoss
 from skimage.transform import resize
+import scipy
+
 
 import PIL
 from PIL import ImageOps, Image
@@ -351,7 +353,7 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
             conv8 = Dropout(0.2)(conv8)
             x = conv8
 
-        conv10 = Conv2D(num_classes, (1,1), activation='softmax', padding="same")(x)
+        conv10 = Conv2D(num_classes, (3,3), activation='softmax', padding="same")(x)
         
         model = keras.Model(inputs, conv10)
 
@@ -378,7 +380,7 @@ if cluster_mode :
 build_model = True
 calculate_metrics = True
 show_predictions = True
-model_path = 'F:/Diploma/code/models/model_stokes_31'
+model_path = 'F:/Diploma/code/models/model_stokes_calc_17'
 
 augment = True
 
@@ -386,20 +388,9 @@ img_size = (512, 608)
 #img_size = (128, 152)
 num_classes = 2
 batch_size = 12
-num_epochs = 60
+num_epochs = 100
 
-input_type = InputType.STOKES_CALC_PLUS
-
-"""
-images = sorted(
-    [
-        os.path.join(input_dir, fname)
-        for fname in os.listdir(input_dir)
-        if fname.endswith(".bmp")
-    ]
-)
-
-"""
+input_type = InputType.STOKES_CALC
 
 images = sorted(
     [
@@ -457,7 +448,6 @@ for ax, j in zip(grid, range(9)) :
 
 
 """
-
 
 if True:
     if build_model :
@@ -531,6 +521,14 @@ if True:
             mask = np.expand_dims(mask, axis=-1)
             _, gt = val_gen.__getitem__(i)
             
+            
+            cn_components, labels = scipy.ndimage.measurements.label(mask)
+            
+            label_stats = []
+            
+            for i in range(labels) :
+                label_stats.append({'label': i + 1, 'num' : 0, 'tp' : 0, 'fp' : 0})
+            
             gt = gt[0]
         
             TP = 0
@@ -540,24 +538,67 @@ if True:
         
             for i in range(gt.shape[0]): 
                 for j in range(gt.shape[1]): 
-                    if gt[i][j] == mask[i][j] == 1:
-                       TP += 1
-                    if mask[i][j] == 1 and gt[i][j] != mask[i][j]:
-                       FP += 1
                     if gt[i][j] == mask[i][j] == 0:
                        TN += 1
-                    if mask[i][j] == 0 and gt[i][j] != mask[i][j]:
+                    elif mask[i][j] == 0 and gt[i][j] != mask[i][j]:
                        FN += 1
-                       
+                    elif gt[i][j] == mask[i][j] == 1:
+                       TP += 1
+                       lab_idx = cn_components[i][j][0] - 1
+                       label_stats[lab_idx]['tp'] += 1
+                       label_stats[lab_idx]['num'] += 1
+                    elif mask[i][j] == 1 and gt[i][j] != mask[i][j]:
+                       FP += 1
+                       lab_idx = cn_components[i][j][0] - 1
+                       label_stats[lab_idx]['fp'] += 1
+                       label_stats[lab_idx]['num'] += 1
+                    
+            cn_stats = [ {'type': 'true', 'num' : 0, 'min' : 10000000, 'mean' : 0, 'max' : 0, 'pr' : 0, 'min_pr' : 1, 'max_pr' : 0, 'num_below_th' : 0},
+                         {'type': 'false', 'num' : 0, 'min' : 10000000, 'mean' : 0, 'max' : 0, 'pr' : 0, 'min_pr' : 1, 'max_pr' : 0, 'num_below_th' : 0}]
+            
+            for stat in label_stats :
+                pr_loc = stat['tp']/stat['num']
+                if(pr_loc > 0.30) :
+                    idx = 0
+                else :
+                    idx = 1
+                    
+                cn_stats[idx]['num'] += 1
+                cn_stats[idx]['pr'] += pr_loc
+                cn_stats[idx]['mean'] += stat['num']
+                
+                if stat['num'] < 100 :
+                    cn_stats[idx]['num_below_th'] += 1
+                
+                if cn_stats[idx]['min_pr'] > pr_loc :
+                    cn_stats[idx]['min_pr'] = pr_loc
+                    
+                if cn_stats[idx]['max_pr'] < pr_loc :
+                    cn_stats[idx]['max_pr'] = pr_loc
+                    
+                if cn_stats[idx]['min'] > stat['num'] :
+                    cn_stats[idx]['min'] = stat['num'] 
+                    
+                if cn_stats[idx]['max'] < stat['num']:
+                    cn_stats[idx]['max'] = stat['num'] 
+                
+            """
+            if cn_stats[0]['num'] > 0 :
+                cn_stats[0]['mean'] /= cn_stats[0]['num']
+            
+            if cn_stats[1]['num'] > 0 :
+                cn_stats[1]['mean'] /= cn_stats[1]['num']
+            """
+            
             pr = TP / (TP + FP)
             re = TP / (TP + FN)
             f1 = 2 / (1/pr + 1/re)
-        
-            return (pr, re, f1)
+            
+            return (pr, re, f1, cn_stats)
         
         # Display results for validation image #10
         i = 0
-        num_of_vals = 25
+        num_of_vals = 10
         
         val_preds = model.predict(val_gen)
         
@@ -588,11 +629,37 @@ if True:
             re_sum = 0.0
             f1_sum = 0.0
             
-        
-            for i in range(num_of_preds):
+            cn_stats = [ {'type': 'true', 'num' : 0, 'min' : 10000000, 'mean' : 0, 'max' : 0, 'pr' : 0, 'min_pr' : 1, 'max_pr' : 0, 'num_below_th' : 0},
+                                  {'type': 'false', 'num' : 0, 'min' : 10000000, 'mean' : 0, 'max' : 0, 'pr' : 0, 'min_pr' : 1, 'max_pr' : 0, 'num_below_th' : 0}]
+                    
+            for i in range(num_of_preds) :
    
-                (pr, re, f1) = get_metrics(i)
-            
+                (pr, re, f1, cn_stats_loc) = get_metrics(i)
+                
+                for stat in cn_stats_loc :
+                    if(stat['type'] == 'true') :
+                        idx = 0
+                    else :
+                        idx = 1
+                        
+                    cn_stats[idx]['num'] += stat['num']
+                    cn_stats[idx]['pr'] += stat['pr']
+                    cn_stats[idx]['mean'] += stat['mean']
+        
+                    cn_stats[idx]['num_below_th'] += stat['num_below_th']
+                    
+                    if cn_stats[idx]['min_pr'] > stat['min_pr'] :
+                        cn_stats[idx]['min_pr'] = stat['min_pr']
+                        
+                    if cn_stats[idx]['max_pr'] < stat['max_pr'] :
+                        cn_stats[idx]['max_pr'] = stat['max_pr']
+                        
+                    if cn_stats[idx]['min'] > stat['min'] :
+                        cn_stats[idx]['min'] = stat['min'] 
+                        
+                    if cn_stats[idx]['max'] < stat['max']:
+                        cn_stats[idx]['max'] = stat['max'] 
+                            
                 pr_sum += pr
                 re_sum += re
                 f1_sum += f1
@@ -600,4 +667,15 @@ if True:
                 print('Precision: ' + str(pr) + ' ;  ' + 'Recall: ' + str(re) + ' ;  ' + 'F1: ' + str(f1))
         
             
+            if cn_stats[0]['num'] > 0 :
+                cn_stats[0]['mean'] /= cn_stats[0]['num']
+                cn_stats[0]['pr'] /= cn_stats[0]['num']
+                
+            if cn_stats[1]['num'] > 0 :
+                cn_stats[1]['mean'] /= cn_stats[1]['num']
+                cn_stats[1]['pr'] /= cn_stats[1]['num']
+        
+            print(cn_stats)
+        
             print('AVERAGE ::: Precision: ' + str(pr_sum / num_of_preds) + ' ;  ' + 'Recall: ' + str(re_sum / num_of_preds) + ' ;  ' + 'F1: ' + str(f1_sum / num_of_preds))
+
