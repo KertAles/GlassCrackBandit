@@ -360,7 +360,7 @@ def unet_model_blocks(inputs=None, num_classes=2, input_type=InputType.AVERAGE, 
         return inputs, conv10, model
     
 
-cluster_mode = True
+cluster_mode = False
 
 if cluster_mode :
     name_dir = '/storage/local/hdd/dataset/'
@@ -374,10 +374,10 @@ else :
     model_dir = 'F:/Diploma/models/'
 
 if cluster_mode :
-    os.environ["CUDA_VISIBLE_DEVICES"]="2"
+    os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 
-build_model = True
+build_model = False
 calculate_metrics = True
 show_predictions = True
 model_path = 'F:/Diploma/code/models/model_stokes_calc_27'
@@ -390,7 +390,7 @@ num_classes = 2
 batch_size = 12
 num_epochs = 80
 
-input_type = InputType.STOKES_CALC_PLUS
+input_type = InputType.FOUR_CHANNEL
 
 images = sorted(
     [
